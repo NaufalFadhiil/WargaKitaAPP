@@ -8,7 +8,7 @@ class RegisterScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Halaman Register',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
 
         ),
       ),
@@ -30,7 +30,7 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 2.0),
-                  child: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.onBackground),
+                  child: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.onSurface),
                 ),
               ],
             ),
@@ -112,7 +112,7 @@ class RegisterScreen extends StatelessWidget {
               children: [
                 Text(
                   'Sudah memiliki akun? ',
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSurface),
                 ),
                 GestureDetector(
                   onTap: () {

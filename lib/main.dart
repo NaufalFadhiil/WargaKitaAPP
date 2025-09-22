@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:warga_kita_app/style/theme/wargakita_theme.dart';
-import 'screen/register_screen.dart';
+
 
 void main() {
   runApp(const MyApp());
