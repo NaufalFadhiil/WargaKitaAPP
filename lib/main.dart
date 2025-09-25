@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warga_kita_app/screen/login_screen.dart';
 import 'package:warga_kita_app/screen/register_screen.dart';
 import 'package:warga_kita_app/screen/splash_screen.dart';
 import 'package:warga_kita_app/style/theme/wargakita_theme.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
       // daftar route
       routes: {
         '/': (context) => const SplashScreen(),
+        '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         // '/login': (context) => const LoginPage(), // bisa ditambah nanti
       },
