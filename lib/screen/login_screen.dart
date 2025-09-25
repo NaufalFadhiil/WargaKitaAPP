@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class RegisterScreen extends StatelessWidget {
-  const RegisterScreen({super.key});
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +17,7 @@ class RegisterScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Logo + Info icon
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -30,18 +31,20 @@ class RegisterScreen extends StatelessWidget {
 
                 const SizedBox(height: 25),
 
+                // Judul
                 Text(
                   'Selamat Datang!',
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Register untuk akses Community!',
+                  'Login untuk akses Community!',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
 
                 const SizedBox(height: 32),
 
+                // Form Nama
                 TextFormField(
                   decoration: InputDecoration(
                     prefixIcon: Icon(
@@ -57,6 +60,7 @@ class RegisterScreen extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
+                // Form Password
                 TextFormField(
                   obscureText: true,
                   decoration: InputDecoration(
@@ -71,24 +75,9 @@ class RegisterScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 16),
-
-                TextFormField(
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.phone,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    labelText: 'Nomor Telepon',
-                    border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                    ),
-                  ),
-                ),
-
                 const SizedBox(height: 21),
 
+                // Tombol Masuk
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -101,10 +90,10 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Buat Akun',
+                      'Masuk',
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         color: Theme.of(context).colorScheme.onPrimary,
-                        fontWeight: FontWeight.w600
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -112,20 +101,21 @@ class RegisterScreen extends StatelessWidget {
 
                 const SizedBox(height: 14),
 
+                // Link Daftar
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Sudah memiliki akun? ',
+                      'Belum memiliki akun? ',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     GestureDetector(
                       onTap: () {
-                        // Navigasi ke login
-                        Navigator.pushNamed(context, '/login');
+                        // Navigasi ke Register
+                        Navigator.pushNamed(context, '/register');
                       },
                       child: Text(
-                        'Login Sekarang',
+                        'Daftar Sekarang',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
