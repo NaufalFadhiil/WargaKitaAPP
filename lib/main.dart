@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:warga_kita_app/screen/add_activity_screen.dart';
 import 'package:warga_kita_app/screen/add_help_screen.dart';
 import 'package:warga_kita_app/screen/home_screen.dart';
+import 'package:warga_kita_app/screen/detail_kegiatan.dart';
 import 'package:warga_kita_app/screen/login_screen.dart';
 import 'package:warga_kita_app/screen/register_screen.dart';
 import 'package:warga_kita_app/screen/splash_screen.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/home': (context) => HomeScreen(),
+        '/detail-kegiatan': (context) => DetailKegiatan()
         '/add-activity': (context) => const AddActivityScreen(),
         '/add-help': (context) => const AddHelpScreen(),
     //  '/activity-detail': (context) => const ActivityDetailScreen(),
