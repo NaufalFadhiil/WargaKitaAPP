@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../data/dummy_data.dart';
-import '../style/colors/wargakita_colors.dart';
-import '../widget/activity_banner.dart';
 import '../widget/header_section.dart';
+import '../widget/activity_banner.dart';
 import '../widget/help_banner.dart';
-
+import '../style/colors/wargakita_colors.dart';
+import '../widget/add_selection.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +20,10 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       helpItems[index]['isChecked'] = value ?? false;
     });
+  }
+
+  void _showSelectionModal() {
+    showAddSelectionModal(context);
   }
 
   @override
@@ -76,13 +80,22 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 children: [
                   ...communityActivities.map((activity) {
-                    return ActivityBanner(
-                      title: activity['title'],
-                      subtitle: activity['subtitle'],
-                      date: activity['date'],
-                      location: activity['location'],
-                      avatars: activity['avatars'],
-                      bgColor: activity['bgColor'],
+                    return GestureDetector(
+                      onTap: () { // logika ke activity detail (di file main tinggal hapus ini "//")
+                        Navigator.pushNamed(
+                          context,
+                          '/activity-detail',
+                          arguments: activity,
+                        );
+                      },
+                      child: ActivityBanner(
+                        title: activity['title'],
+                        subtitle: activity['subtitle'],
+                        date: activity['date'],
+                        location: activity['location'],
+                        avatars: activity['avatars'],
+                        bgColor: activity['bgColor'],
+                      ),
                     );
                   }).toList(),
                   const SizedBox(width: 16),
@@ -115,11 +128,21 @@ class _HomeScreenState extends State<HomeScreen> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: helpItems.length,
               itemBuilder: (context, index) {
-                return HelpBanner(
-                  title: helpItems[index]['title'],
-                  subtitle: helpItems[index]['subtitle'],
-                  isChecked: helpItems[index]['isChecked'],
-                  onChanged: (value) => _toggleChecked(index, value),
+                final item = helpItems[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context, // logika ke help detail (di file main tinggal hapus ini "//")
+                      '/help-detail',
+                      arguments: item,
+                    );
+                  },
+                  child: HelpBanner(
+                    title: item['title'],
+                    subtitle: item['subtitle'],
+                    isChecked: item['isChecked'],
+                    onChanged: (value) => _toggleChecked(index, value),
+                  ),
                 );
               },
             ),
@@ -127,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: _showSelectionModal,
         backgroundColor: theme.primaryColor,
         foregroundColor: WargaKitaColors.white.color,
         child: const Icon(Icons.add),
