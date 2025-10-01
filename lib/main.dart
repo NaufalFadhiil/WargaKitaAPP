@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warga_kita_app/screen/home_screen.dart';
 import 'package:warga_kita_app/screen/login_screen.dart';
 import 'package:warga_kita_app/screen/register_screen.dart';
 import 'package:warga_kita_app/screen/splash_screen.dart';
@@ -26,6 +27,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => RegisterScreen(),
+        '/home': (context) => HomeScreen(),
+
       },
     );
   }
