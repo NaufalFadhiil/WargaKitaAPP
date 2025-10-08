@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../data/dummy_data.dart';
 import '../widget/header_section.dart';
-import '../widget/activity_banner.dart';
-import '../widget/help_banner.dart';
+import '../widget/activity_card.dart';
+import '../widget/help_card.dart';
 import '../style/colors/wargakita_colors.dart';
 import '../widget/add_selection.dart';
 
@@ -16,12 +16,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> helpItems = List<Map<String, dynamic>>.from(initialHelpItems);
 
-  void _toggleChecked(int index, bool? value) {
-    setState(() {
-      helpItems[index]['isChecked'] = value ?? false;
-    });
-  }
-
   void _showSelectionModal() {
     showAddSelectionModal(context);
   }
@@ -29,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -46,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
               profileAsset: "assets/profile1.jpeg",
             ),
             const SizedBox(height: 20),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -74,21 +66,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 10),
-
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
                   ...communityActivities.map((activity) {
                     return GestureDetector(
-                      onTap: () { // logika ke activity detail (di file main tinggal hapus ini "//")
+                      onTap: () {
                         Navigator.pushNamed(
                           context,
-                          '/activity-detail',
+                          '/detail-kegiatan',
                           arguments: activity,
                         );
                       },
-                      child: ActivityBanner(
+                      child: ActivityCard(
                         title: activity['title'],
                         subtitle: activity['subtitle'],
                         date: activity['date'],
@@ -102,9 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -122,7 +111,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 10),
-
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -132,16 +120,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 return GestureDetector(
                   onTap: () {
                     Navigator.pushNamed(
-                      context, // logika ke help detail (di file main tinggal hapus ini "//")
+                      context,
                       '/help-detail',
                       arguments: item,
                     );
                   },
-                  child: HelpBanner(
+                  child: HelpCard(
                     title: item['title'],
-                    subtitle: item['subtitle'],
-                    isChecked: item['isChecked'],
-                    onChanged: (value) => _toggleChecked(index, value),
+                    subtitle: item['needs'],
                   ),
                 );
               },

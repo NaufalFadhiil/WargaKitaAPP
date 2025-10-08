@@ -23,7 +23,7 @@ final List<Map<String, dynamic>> communityActivities = [
       "assets/profile4.jpeg",
       "assets/profile2.jpeg",
     ],
-    "bgColor": Colors.orange,
+    "bgColor": Colors.orange ,
   },
   {
     "title": "Donor Darah",
@@ -35,24 +35,27 @@ final List<Map<String, dynamic>> communityActivities = [
       "assets/profile2.jpeg",
       "assets/profile3.jpeg",
     ],
-    "bgColor": Colors.blueGrey,
+    "bgColor": Colors.blueGrey ,
   },
 ];
 
 final List<Map<String, dynamic>> initialHelpItems = [
   {
-    "title": "Pinjam Sound System 1",
-    "subtitle": "Lagi ada acara RT minggu depan, kami butuh sound system untuk hiburan warga.",
-    "isChecked": false,
+    "title": "Pinjam Sound System",
+    "needs": "Lagi ada acara RT minggu depan, kami butuh sound system untuk hiburan warga. Kalau ada yang bisa pinjamkan sangat membantu sekali.",
+    "description": "Sound System 3 buah, mikrofon, kabel roll",
+    "location": "Rumah Bapak RT 01",
   },
   {
-    "title": "Pinjam Sound System 2",
-    "subtitle": "Lagi ada acara RT minggu depan, kami butuh sound system untuk hiburan warga.",
-    "isChecked": false,
+    "title": "Pinjam Tenda",
+    "needs": "Acara 17an butuh tenda besar untuk panggung utama. Mohon bantuannya warga.",
+    "description": "Tenda ukuran 4x6 meter, 1 buah",
+    "location": "Lapangan RW 02",
   },
   {
-    "title": "Pinjam Sound System 3",
-    "subtitle": "Lagi ada acara RT minggu depan, kami butuh sound system untuk hiburan warga.",
-    "isChecked": false,
-  },
+    "title": "Pinjam Proyektor",
+    "needs": "Untuk presentasi PKK bulan depan, kami butuh proyektor dan layar.",
+    "description": "Proyektor 1 unit, Layar 1 unit",
+    "location": "Balai Warga RW 03",
+      },
 ];

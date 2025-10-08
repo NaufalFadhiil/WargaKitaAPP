@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="warga_kita_app"
+        android:label="Warga Kita App"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
