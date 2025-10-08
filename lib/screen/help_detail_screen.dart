@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-import '../widget/detail_kegiatan_header.dart';
-import '../widget/detail_kegiatan_content.dart';
-import '../widget/confirmation_dialog.dart';
+import '../widget/detail_minjam_header.dart';
+import '../widget/help_detail_content.dart';
 
-class DetailKegiatan extends StatelessWidget {
-  final Map<String, dynamic> kegiatan;
+class HelpDetailScreen extends StatelessWidget {
+  final Map<String, dynamic> helpItem;
 
-  const DetailKegiatan({super.key, required this.kegiatan});
+  const HelpDetailScreen({super.key, required this.helpItem});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kegiatan["bgColor"],
+      backgroundColor: const Color(0xFF003E6A),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: Colors.white),
-        title: const Text("Detail Kegiatan",
+        title: const Text("Detail Bantu",
             style: TextStyle(color: Colors.white)),
         actions: [
           IconButton(
@@ -29,12 +28,9 @@ class DetailKegiatan extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DetailKegiatanHeader(
-              kegiatan: kegiatan,
-              onJoinPressed: () => showConfirmDialog(context, kegiatan),
-            ),
+            HelpDetailHeader(helpItem: helpItem),
             Expanded(
-              child: DetailKegiatanContent(kegiatan: kegiatan),
+              child: HelpDetailContent(helpItem: helpItem),
             ),
           ],
         ),

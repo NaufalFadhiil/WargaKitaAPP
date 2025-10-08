@@ -5,7 +5,7 @@ import '../style/colors/wargakita_colors.dart';
 class AddActivityScreen extends StatelessWidget {
   const AddActivityScreen({super.key});
 
-  @override
+  @override 
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -91,7 +91,7 @@ class AddActivityScreen extends StatelessWidget {
 
             const FormInputField(
               title: "Link Grup WhatsApp",
-              hintText: "https://www.com/grup-acara-desa",
+              hintText: "https://chat.whatsapp.com/grup-acara-desa",
             ),
 
             const FormInputField(

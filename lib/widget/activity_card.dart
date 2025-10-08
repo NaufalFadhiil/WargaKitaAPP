@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ActivityBanner extends StatelessWidget {
+class ActivityCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String date;
@@ -8,7 +8,7 @@ class ActivityBanner extends StatelessWidget {
   final List<String> avatars;
   final Color bgColor;
 
-  const ActivityBanner({
+  const ActivityCard({
     super.key,
     required this.title,
     required this.subtitle,
@@ -21,10 +21,10 @@ class ActivityBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double bannerWidth = screenWidth * 0.85;
+    final double CardWidth = screenWidth * 0.85;
 
     return Container(
-      width: bannerWidth,
+      width: CardWidth,
       margin: const EdgeInsets.only(left: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
