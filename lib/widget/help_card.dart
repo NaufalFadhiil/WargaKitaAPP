@@ -4,18 +4,12 @@ class HelpCard extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const HelpCard({
-    super.key,
-    required this.title,
-    required this.subtitle,
-  });
+  const HelpCard({super.key, required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
     const Color defaultBorderColor = Color(0xFFE0E0E0);
-    const Color bottomBorderColor = Color(0xFFD0D0D0);
     const double thinBorderWidth = 1.0;
-    const double thickBorderWidth = 2.0;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -38,20 +32,14 @@ class HelpCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             subtitle,
             maxLines: 4,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.black54,
-            ),
+            style: const TextStyle(fontSize: 14, color: Colors.black54),
           ),
         ],
       ),
