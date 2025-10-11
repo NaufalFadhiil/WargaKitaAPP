@@ -55,7 +55,6 @@ class AddSelectionModal extends StatelessWidget {
               _buildSelectionButton(context, "Acara", '/add-activity'),
               _buildSelectionButton(context, "Bantu", '/add-help'),
 
-              // Tombol Batal
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);

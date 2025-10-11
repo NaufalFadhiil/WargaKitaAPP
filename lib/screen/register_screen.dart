@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
-import 'package:warga_kita_app/widget/wargakita_input_decoration.dart';
+import '../data/user_model.dart';
+import '../widget/registration_form_field.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -71,7 +72,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: () {
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       '/login',
-                      (Route<dynamic> route) => false,
+                          (Route<dynamic> route) => false,
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -116,16 +117,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (user != null) {
           await user.updateDisplayName(_nameController.text);
 
+          final userProfile = UserModel(
+            uid: user.uid,
+            username: _nameController.text,
+            email: _emailController.text,
+            phoneNumber: _phoneController.text,
+          );
+
           await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
-              .set({
-                'uid': user.uid,
-                'username': _nameController.text,
-                'email': _emailController.text,
-                'phone_number': _phoneController.text,
-                'created_at': FieldValue.serverTimestamp(),
-              });
+              .set(
+            userProfile.toFirestore()..['created_at'] = FieldValue.serverTimestamp(),
+          );
 
           _showSuccessDialog();
         }
@@ -149,6 +153,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
@@ -161,141 +174,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 horizontal: 20.0,
                 vertical: 45.0,
               ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Image.asset('assets/images/logo+name.png', height: 40),
-                        Icon(
-                          Icons.info_outline,
-                          color: WargaKitaColors.black.color,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 25),
-
-                    Text(
-                      'Selamat Datang!',
-                      style: WargaKitaTextStyles.headlineLarge,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Register untuk akses Community!',
-                      style: WargaKitaTextStyles.bodyMedium,
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    TextFormField(
-                      controller: _nameController,
-                      validator: (value) => value == null || value.isEmpty
-                          ? "Nama wajib diisi"
-                          : null,
-                      decoration: WargaKitaInputDecoration(
-                        icon: Icons.person,
-                        labelText: 'Nama',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Image.asset('assets/images/logo+name.png', height: 40),
+                      Icon(
+                        Icons.info_outline,
+                        color: WargaKitaColors.black.color,
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                    ],
+                  ),
+                  const SizedBox(height: 25),
 
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Email wajib diisi";
-                        } else if (!value.endsWith('@gmail.com')) {
-                          return "Email harus menggunakan format @gmail.com";
-                        }
-                        return null;
-                      },
-                      decoration: WargaKitaInputDecoration(
-                        icon: Icons.email,
-                        labelText: 'Email',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                  Text(
+                    'Selamat Datang!',
+                    style: WargaKitaTextStyles.headlineLarge,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Register untuk akses Community!',
+                    style: WargaKitaTextStyles.bodyMedium,
+                  ),
 
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Password wajib diisi";
-                        } else if (value.length < 6) {
-                          return "Password minimal 6 karakter";
-                        }
-                        return null;
-                      },
-                      decoration: WargaKitaInputDecoration(
-                        icon: Icons.lock,
-                        labelText: 'Masukkan password',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                  const SizedBox(height: 32),
 
-                    TextFormField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      validator: (value) => value == null || value.isEmpty
-                          ? "Nomor telepon wajib diisi"
-                          : null,
-                      decoration: WargaKitaInputDecoration(
-                        icon: Icons.phone,
-                        labelText: 'Nomor Telepon',
-                      ),
-                    ),
-                    const SizedBox(height: 21),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _onRegister,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: WargaKitaColors.primary.color,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          'Buat Akun',
-                          style: WargaKitaTextStyles.bodyMedium.copyWith(
-                            color: WargaKitaColors.white.color,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Sudah memiliki akun? ',
-                          style: WargaKitaTextStyles.bodyMedium,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/login');
-                          },
-                          child: Text(
-                            'Login Sekarang',
-                            style: WargaKitaTextStyles.bodyMedium.copyWith(
-                              color: WargaKitaColors.primary.color,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  RegistrationFormFields(
+                    formKey: _formKey,
+                    nameController: _nameController,
+                    emailController: _emailController,
+                    passwordController: _passwordController,
+                    phoneController: _phoneController,
+                    onRegister: _onRegister,
+                    onLoginRedirect: () {
+                      Navigator.pushNamed(context, '/login');
+                    },
+                  ),
+                ],
               ),
             ),
           ),
