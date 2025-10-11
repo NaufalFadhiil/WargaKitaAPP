@@ -1,12 +1,71 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
+import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
+import 'package:warga_kita_app/widget/wargakita_input_decoration.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  void _showSuccessSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: WargaKitaColors.primary.color,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showAuthError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: WargaKitaColors.secondary.color,
+      ),
+    );
+  }
+
+  void _onLogin() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+        _showSuccessSnackbar("Login Berhasil! Selamat datang di Community.");
+
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        Navigator.of(context).pushReplacementNamed('/home');
+      } on FirebaseAuthException catch (e) {
+        String errorMessage = 'Login Gagal.';
+        if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+          errorMessage = 'Email atau password salah.';
+        } else if (e.code == 'invalid-email') {
+          errorMessage = 'Format email tidak valid.';
+        }
+
+        _showAuthError(errorMessage);
+      } catch (e) {
+        _showAuthError("Terjadi error tak terduga.");
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: WargaKitaColors.white.color,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -14,119 +73,118 @@ class LoginScreen extends StatelessWidget {
               horizontal: 20.0,
               vertical: 45.0,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Logo + Info icon
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Image.asset('assets/images/logo+name.png', height: 40),
-                    Icon(
-                      Icons.info_outline,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 25),
-
-                // Judul
-                Text(
-                  'Selamat Datang!',
-                  style: Theme.of(context).textTheme.headlineLarge,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Login untuk akses Community!',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-
-                const SizedBox(height: 32),
-
-                // Form Nama
-                TextFormField(
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.person,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    labelText: 'Nama',
-                    border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                    ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Image.asset('assets/images/logo+name.png', height: 40),
+                      Icon(
+                        Icons.info_outline,
+                        color: WargaKitaColors.black.color,
+                      ),
+                    ],
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 25),
 
-                // Form Password
-                TextFormField(
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.lock,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    labelText: 'Masukkan password',
-                    border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                    ),
+                  Text(
+                    'Selamat Datang!',
+                    style: WargaKitaTextStyles.headlineLarge,
                   ),
-                ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Login untuk akses Community!',
+                    style: WargaKitaTextStyles.bodyMedium,
+                  ),
 
-                const SizedBox(height: 21),
+                  const SizedBox(height: 32),
 
-                // Tombol Masuk
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/home');
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Email wajib diisi";
+                      } else if (!value.endsWith('@gmail.com')) {
+                        return "Email harus menggunakan format @gmail.com";
+                      }
+                      return null;
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      'Masuk',
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    decoration: WargaKitaInputDecoration(
+                      icon: Icons.email,
+                      labelText: 'Email',
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 14),
+                  const SizedBox(height: 16),
 
-                // Link Daftar
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Belum memiliki akun? ',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Password wajib diisi";
+                      }
+                      return null;
+                    },
+                    decoration: WargaKitaInputDecoration(
+                      icon: Icons.lock,
+                      labelText: 'Masukkan password',
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        // Navigasi ke Register
-                        Navigator.pushNamed(context, '/register');
-                      },
+                  ),
+
+                  const SizedBox(height: 21),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _onLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: WargaKitaColors.primary.color,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: Text(
-                        'Daftar Sekarang',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
+                        'Masuk',
+                        style: WargaKitaTextStyles.bodyMedium.copyWith(
+                          color: WargaKitaColors.white.color,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Belum memiliki akun? ',
+                        style: WargaKitaTextStyles.bodyMedium,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/register');
+                        },
+                        child: Text(
+                          'Daftar Sekarang',
+                          style: WargaKitaTextStyles.bodyMedium.copyWith(
+                            color: WargaKitaColors.primary.color,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

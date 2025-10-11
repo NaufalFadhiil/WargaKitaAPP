@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warga_kita_app/widget/logout_button.dart';
 import '../data/dummy_data.dart';
 import '../widget/header_section.dart';
 import '../widget/activity_card.dart';
@@ -14,7 +15,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, dynamic>> helpItems = List<Map<String, dynamic>>.from(initialHelpItems);
+  List<Map<String, dynamic>> helpItems = List<Map<String, dynamic>>.from(
+    initialHelpItems,
+  );
 
   void _showSelectionModal() {
     showAddSelectionModal(context);
@@ -37,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
               userName: "Afif Sasonda",
               date: "Sept 15, 2025",
               profileAsset: "assets/profile1.jpeg",
+              logoutButton: const LogoutButton(),
             ),
             const SizedBox(height: 20),
             Padding(
@@ -49,11 +53,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         "Aktivitas Community",
-                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         "Lihat semua",
-                        style: theme.textTheme.bodySmall?.copyWith(color: theme.primaryColor),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.primaryColor,
+                        ),
                       ),
                     ],
                   ),
@@ -101,11 +109,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     "Bantu Warga",
-                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     "Lihat semua",
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.primaryColor),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.primaryColor,
+                    ),
                   ),
                 ],
               ),

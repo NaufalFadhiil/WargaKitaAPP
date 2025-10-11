@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1003882209511",
+    "project_id": "wargakitaapp",
+    "storage_bucket": "wargakitaapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1003882209511:android:264d708524812b3083c242",
+        "android_client_info": {
+          "package_name": "com.example.warga_kita_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKTndslwjPWmXMsNq_Hn-VoBA1uRYqJVE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,12 +4,14 @@ class HeaderSection extends StatelessWidget {
   final String userName;
   final String date;
   final String profileAsset;
+  final Widget? logoutButton; 
 
   const HeaderSection({
     super.key,
     required this.userName,
     required this.date,
     required this.profileAsset,
+    this.logoutButton, 
   });
 
   @override
@@ -34,6 +36,8 @@ class HeaderSection extends StatelessWidget {
                 style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
               const Spacer(),
+              if (logoutButton != null) logoutButton!,
+
               CircleAvatar(
                 backgroundImage: AssetImage(profileAsset),
                 radius: 18,
