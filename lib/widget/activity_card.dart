@@ -4,6 +4,7 @@ class ActivityCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String date;
+  final String time;
   final String location;
   final List<String> avatars;
   final Color bgColor;
@@ -13,6 +14,7 @@ class ActivityCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.date,
+    required this.time,
     required this.location,
     required this.avatars,
     required this.bgColor,
@@ -59,23 +61,32 @@ class ActivityCard extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildInfoRow() {
     return Row(
       children: [
-        _buildInfoChip(
-          icon: Icons.calendar_today,
-          text: date,
-          iconColor: Colors.white,
-          isFlexible: false,
-        ),
-        const SizedBox(width: 8),
         Expanded(
+          flex: 2,
           child: _buildInfoChip(
             icon: Icons.location_on,
             text: location,
             iconColor: Colors.redAccent,
             isFlexible: true,
           ),
+        ),
+        const SizedBox(width: 8),
+        _buildInfoChip(
+          icon: Icons.access_time,
+          text: time,
+          iconColor: Colors.white,
+          isFlexible: false,
+        ),
+        const SizedBox(width: 8),
+        _buildInfoChip(
+          icon: Icons.calendar_today,
+          text: date,
+          iconColor: Colors.white,
+          isFlexible: false,
         ),
       ],
     );

@@ -36,7 +36,6 @@ class _SplashScreenState extends State<SplashScreen> {
                 stops: const [0.0, 0.5, 1.0],
                 colors: [
                   Colors.transparent,
-                  // ignore: deprecated_member_use
                   Colors.white.withOpacity(0.9),
                   const Color(0xFFF8F8F8),
                 ],
@@ -44,7 +43,6 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ),
 
-          // Logo
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -19,7 +19,7 @@ class AddHelpController {
 
   String? validateRequired(String? value, String fieldName) {
     if (value == null || value.isEmpty) {
-      return '$fieldName wajib diisi.';
+      return 'Wajib diisi.';
     }
     return null;
   }

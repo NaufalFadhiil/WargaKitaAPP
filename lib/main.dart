@@ -10,10 +10,12 @@ import 'package:warga_kita_app/screen/register_screen.dart';
 import 'package:warga_kita_app/screen/splash_screen.dart';
 import 'package:warga_kita_app/style/theme/wargakita_theme.dart';
 import 'package:warga_kita_app/screen/help_detail_screen.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await initializeDateFormatting('id', null);
   runApp(const MyApp());
 }
 
@@ -34,16 +36,16 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/detail-kegiatan': (context) {
           final args =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>;
+          ModalRoute.of(context)!.settings.arguments
+          as Map<String, dynamic>;
           return ActivityDetailScreen(kegiatan: args);
         },
         '/add-activity': (context) => const AddActivityScreen(),
         '/add-help': (context) => const AddHelpScreen(),
         '/help-detail': (context) {
           final args =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>;
+          ModalRoute.of(context)!.settings.arguments
+          as Map<String, dynamic>;
           return HelpDetailScreen(helpItem: args);
         },
       },

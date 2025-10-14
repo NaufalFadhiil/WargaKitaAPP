@@ -184,7 +184,7 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                   Expanded(
                     child: FormInputField(
                       controller: _controller.volunteersController,
-                      title: "Relawan Dibutuhkan",
+                      title: "Relawan ",
                       hintText: "Contoh: 25",
                       validator: _controller.validateVolunteers,
                     ),

@@ -1,13 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:warga_kita_app/widget/logout_button.dart';
-import '../controller/display_help_controler.dart';
-import '../widget/activity_card.dart';
-import '../widget/help_card.dart';
-import '../style/colors/wargakita_colors.dart';
-import '../widget/add_selection.dart';
 import '../controller/display_activity_controller.dart';
+import '../controller/display_help_controler.dart';
 import '../data/activity_model.dart';
 import '../data/help_model.dart';
+import '../style/colors/wargakita_colors.dart';
+import '../widget/activity_card.dart';
+import '../widget/add_selection.dart';
+import '../widget/help_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,11 +22,20 @@ class _HomeScreenState extends State<HomeScreen> {
   late final DisplayActivityController _activityController;
   late final DisplayHelpController _helpController;
 
+  User? _currentUser;
+  String _currentDate = '';
+
   @override
   void initState() {
     super.initState();
     _activityController = DisplayActivityController();
     _helpController = DisplayHelpController();
+    _loadUserInfo();
+  }
+
+  void _loadUserInfo() {
+    _currentUser = FirebaseAuth.instance.currentUser;
+    _currentDate = DateFormat('d MMM, yyyy', 'id_ID').format(DateTime.now());
   }
 
   void _showSelectionModal() {
@@ -84,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 TextSpan(
-                  text: " Today!",
+                  text: ", Today!",
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
               ],
@@ -134,13 +145,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.pushNamed(
                       context,
                       '/detail-kegiatan',
-                      arguments: activity.toMap(),
+                      arguments: activity.toMap()..['bgColor'] = bgColor,
                     );
                   },
                   child: ActivityCard(
                     title: activity.title,
                     subtitle: activity.description,
                     date: activity.date,
+                    time: activity.time,
                     location: activity.location,
                     avatars: dummyAvatars,
                     bgColor: bgColor,
@@ -204,9 +216,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final userName = _currentUser?.displayName ?? "Warga Kita";
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -218,9 +233,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             _buildHeaderSection(
-              userName: "Afif Sasonda",
-              date: "Sept 15, 2025",
-              profileAsset: "assets/profile1.jpeg",
+              userName: userName,
+              date: _currentDate,
+              profileAsset: "assets/images/profile1.jpeg",
               logoutButton: const LogoutButton(),
             ),
             const SizedBox(height: 20),
@@ -238,17 +253,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        "Lihat semua",
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.primaryColor,
-                        ),
-                      ),
+                      // Text(
+                      //   "Lihat semua",
+                      //   style: theme.textTheme.bodySmall?.copyWith(
+                      //     color: theme.primaryColor,
+                      //   ),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "Aktivitas Community & Bantuan?",
+                    "Bantu Komunitas Mengorganisir Acara",
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
@@ -270,14 +285,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
-                    "Lihat semua",
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.primaryColor,
-                    ),
-                  ),
+                  // Text(
+                  //   "Lihat semua",
+                  //   style: theme.textTheme.bodySmall?.copyWith(
+                  //     color: theme.primaryColor,
+                  //   ),
+                  // ),
                 ],
               ),
+
+            ),
+            const SizedBox(height: 6),
+            Text(
+              "Bantu Pinjamkan Barang ke Warga yang Membutuhkan",
+              style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 10),
 
