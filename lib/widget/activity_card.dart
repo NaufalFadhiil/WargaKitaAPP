@@ -59,7 +59,6 @@ class ActivityCard extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildInfoRow() {
     return Row(
       children: [
@@ -135,7 +134,7 @@ class ActivityCard extends StatelessWidget {
         const SizedBox(width: 4),
         Expanded(
           child: Text(
-            "+2 Orang",
+            avatars.length > 3 ? "+${avatars.length - 3} Orang" : "Beberapa Orang",
             style: const TextStyle(color: Colors.white),
             overflow: TextOverflow.ellipsis,
           ),

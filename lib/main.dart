@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:warga_kita_app/firebase_options.dart';
 import 'package:warga_kita_app/screen/add_activity_screen.dart';
 import 'package:warga_kita_app/screen/add_help_screen.dart';
-import 'package:warga_kita_app/screen/detail_kegiatan_screen.dart';
+import 'package:warga_kita_app/screen/activity_detail_screen.dart';
 import 'package:warga_kita_app/screen/home_screen.dart';
 import 'package:warga_kita_app/screen/login_screen.dart';
 import 'package:warga_kita_app/screen/register_screen.dart';
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
           final args =
               ModalRoute.of(context)!.settings.arguments
                   as Map<String, dynamic>;
-          return DetailKegiatan(kegiatan: args);
+          return ActivityDetailScreen(kegiatan: args);
         },
         '/add-activity': (context) => const AddActivityScreen(),
         '/add-help': (context) => const AddHelpScreen(),

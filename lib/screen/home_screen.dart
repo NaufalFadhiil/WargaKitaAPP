@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:warga_kita_app/widget/logout_button.dart';
-import '../data/dummy_data.dart';
-import '../widget/header_section.dart';
+import '../controller/display_help_controler.dart';
 import '../widget/activity_card.dart';
 import '../widget/help_card.dart';
 import '../style/colors/wargakita_colors.dart';
 import '../widget/add_selection.dart';
+import '../controller/display_activity_controller.dart';
+import '../data/activity_model.dart';
+import '../data/help_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,12 +17,191 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, dynamic>> helpItems = List<Map<String, dynamic>>.from(
-    initialHelpItems,
-  );
+  late final DisplayActivityController _activityController;
+  late final DisplayHelpController _helpController;
+
+  @override
+  void initState() {
+    super.initState();
+    _activityController = DisplayActivityController();
+    _helpController = DisplayHelpController();
+  }
 
   void _showSelectionModal() {
     showAddSelectionModal(context);
+  }
+
+  Widget _buildHeaderSection({
+    required String userName,
+    required String date,
+    required String profileAsset,
+    Widget? logoutButton,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Color(0xFF003366),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                "Hello, $userName",
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              const Spacer(),
+              if (logoutButton != null) logoutButton,
+              CircleAvatar(
+                backgroundImage: AssetImage(profileAsset),
+                radius: 18,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "📅 $date",
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+          const SizedBox(height: 6),
+          const Text.rich(
+            TextSpan(
+              text: "Explore Your\n ",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+              children: [
+                TextSpan(
+                  text: "Community",
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                TextSpan(
+                  text: " Today!",
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivityList() {
+    return StreamBuilder<List<ActivityModel>>(
+      stream: _activityController.activitiesStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text("Error fetching activities: ${snapshot.error}"));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text("Belum ada aktivitas komunitas.", style: Theme.of(context).textTheme.bodyMedium),
+          );
+        }
+
+        final activities = snapshot.data!;
+        const List<Color> fixedBgColors = [Color(0xFF003366), Colors.orange, Colors.blueGrey];
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              ...activities.asMap().entries.map((entry) {
+                final index = entry.key;
+                final activity = entry.value;
+                final bgColor = fixedBgColors[index % fixedBgColors.length];
+                const List<String> dummyAvatars = [
+                  "assets/profile2.jpeg",
+                  "assets/profile3.jpeg",
+                  "assets/profile4.jpeg",
+                ];
+
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/detail-kegiatan',
+                      arguments: activity.toMap(),
+                    );
+                  },
+                  child: ActivityCard(
+                    title: activity.title,
+                    subtitle: activity.description,
+                    date: activity.date,
+                    location: activity.location,
+                    avatars: dummyAvatars,
+                    bgColor: bgColor,
+                  ),
+                );
+              }).toList(),
+              const SizedBox(width: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHelpList() {
+    return StreamBuilder<List<HelpData>>(
+      stream: _helpController.helpRequestsStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: CircularProgressIndicator(),
+          ));
+        }
+        if (snapshot.hasError) {
+          return Center(child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text("Error fetching help requests: ${snapshot.error}"),
+          ));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text("Belum ada permintaan bantuan.", style: Theme.of(context).textTheme.bodyMedium),
+          );
+        }
+
+        final helpItems = snapshot.data!;
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: helpItems.length,
+          itemBuilder: (context, index) {
+            final item = helpItems[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  '/help-detail',
+                  arguments: item.toMap(),
+                );
+              },
+              child: HelpCard(
+                title: item.title,
+                subtitle: item.purpose,
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -36,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const HeaderSection(
+            _buildHeaderSection(
               userName: "Afif Sasonda",
               date: "Sept 15, 2025",
               profileAsset: "assets/profile1.jpeg",
@@ -74,33 +255,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  ...communityActivities.map((activity) {
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/detail-kegiatan',
-                          arguments: activity,
-                        );
-                      },
-                      child: ActivityCard(
-                        title: activity['title'],
-                        subtitle: activity['subtitle'],
-                        date: activity['date'],
-                        location: activity['location'],
-                        avatars: activity['avatars'],
-                        bgColor: activity['bgColor'],
-                      ),
-                    );
-                  }).toList(),
-                  const SizedBox(width: 16),
-                ],
-              ),
-            ),
+
+            _buildActivityList(),
+
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -123,27 +280,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: helpItems.length,
-              itemBuilder: (context, index) {
-                final item = helpItems[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/help-detail',
-                      arguments: item,
-                    );
-                  },
-                  child: HelpCard(
-                    title: item['title'],
-                    subtitle: item['needs'],
-                  ),
-                );
-              },
-            ),
+
+            _buildHelpList(),
           ],
         ),
       ),
