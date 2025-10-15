@@ -161,7 +161,7 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                     child: FormInputField(
                       controller: _controller.timeController,
                       title: "Waktu",
-                      hintText: "xx:xx",
+                      hintText: "07:00",
                       suffixIcon: Icons.access_time,
                       onSuffixIconTap: () => _controller.selectTime(context),
                       validator: _controller.validateTime,
@@ -184,7 +184,7 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                   Expanded(
                     child: FormInputField(
                       controller: _controller.volunteersController,
-                      title: "Relawan Dibutuhkan",
+                      title: "Relawan ",
                       hintText: "Contoh: 25",
                       validator: _controller.validateVolunteers,
                     ),

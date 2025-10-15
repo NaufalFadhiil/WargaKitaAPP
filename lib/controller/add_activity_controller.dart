@@ -65,7 +65,7 @@ class AddActivityController {
 
   String? validateRequired(String? value, String fieldName) {
     if (value == null || value.isEmpty) {
-      return '$fieldName wajib diisi.';
+      return 'Wajib diisi.';
     }
     return null;
   }
@@ -81,7 +81,7 @@ class AddActivityController {
   String? validateTime(String? value) {
     if (validateRequired(value, 'Waktu') != null) return validateRequired(value, 'Waktu');
     if (!_timeRegex.hasMatch(value!)) {
-      return 'Format harus xx:xx.';
+      return 'Format harus 07:00.';
     }
     return null;
   }
