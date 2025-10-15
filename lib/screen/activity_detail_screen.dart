@@ -1,13 +1,65 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../widget/confirmation_dialog.dart';
+
 import '../service/user_service.dart';
+import '../widget/activity_confirmation_dialog.dart';
 
 
 class ActivityDetailScreen extends StatelessWidget {
   final Map<String, dynamic> kegiatan;
   final UserService _userService = UserService();
+  final String _currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   ActivityDetailScreen({super.key, required this.kegiatan});
+
+  Widget _buildNotesInfoBox(String notes) {
+    if (notes.isEmpty || notes == '-') {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFBEA),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5D5C4), width: 1.5),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.info,
+            color: Color(0xFF6D4C41),
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Catatan",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  notes,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildCreatorInfo(BuildContext context, String uid) {
     return FutureBuilder<String>(
@@ -20,12 +72,12 @@ class ActivityDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 "Penyelenggara",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Colors.black54,
+                  color: Colors.black,
                 ),
               ),
               const SizedBox(height: 4),
@@ -35,8 +87,7 @@ class ActivityDetailScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     creatorName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                    style: const TextStyle(
                       fontSize: 16,
                       color: Colors.black,
                     ),
@@ -51,10 +102,60 @@ class ActivityDetailScreen extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    void onJoinPressed() => showHelpConfirmDialog(  context, kegiatan);
+    final String creatorUid = kegiatan["creatorUid"] as String? ?? 'dummy_uid';
+    final bool isCreator = creatorUid == _currentUid;
 
-    final Color bgColor = kegiatan["bgColor"] as Color? ?? Color(0xFF003E6A);
-    final String neededVolunteers = (kegiatan["neededVolunteers"] as dynamic)?.toString() ?? "0";
+    final int neededVolunteers = int.tryParse((kegiatan["neededVolunteers"] as dynamic)?.toString() ?? "0") ?? 0;
+
+    final int currentVolunteers = (kegiatan["currentVolunteers"] as int?) ?? 0;
+
+    final List<String> participantsUids = (kegiatan["participantsUids"] as List<dynamic>?)
+        ?.map((e) => e.toString()).toList() ?? [];
+
+    final bool hasJoined = participantsUids.contains(_currentUid);
+    final bool isFull = currentVolunteers >= neededVolunteers;
+
+    final bool isButtonDisabled = isCreator || isFull || hasJoined;
+
+    void onJoinPressed() {
+      if (isCreator) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Anda adalah pembuat kegiatan. Anda tidak bisa bergabung."),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else if (isFull) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Relawan sudah penuh!"),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else if (hasJoined) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Anda sudah bergabung di kegiatan ini."),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        showActivityConfirmDialog(context, kegiatan);
+      }
+    }
+
+    final String buttonText = isCreator
+        ? "Anda Adalah Pembuat"
+        : isFull
+        ? "Relawan Penuh"
+        : hasJoined
+        ? "Sudah Bergabung"
+        : "Join Kegiatan";
+
+    final Color bgColor = kegiatan["bgColor"] as Color? ?? const Color(0xFF003E6A);
 
     return Column(
       children: [
@@ -75,10 +176,11 @@ class ActivityDetailScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ElevatedButton(
-                onPressed: onJoinPressed,
+                onPressed: isButtonDisabled ? null : onJoinPressed,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFE6B35),
-                  foregroundColor: Colors.white,
+                  backgroundColor: isButtonDisabled
+                      ? Colors.grey
+                      : const Color(0xFFFE6B35),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: const BorderSide(
@@ -87,15 +189,20 @@ class ActivityDetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 12),
                 ),
-                child: const Text("Join Kegiatan"),
-              ),
-              Row(
+                child: Text(
+                  buttonText,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),              Row(
                 children: [
                   const Icon(Icons.person_2_outlined,
                       color: Colors.white, size: 30),
                   const SizedBox(width: 6),
-                  Text("$neededVolunteers/25",
-                      style: TextStyle(
+                  Text("$currentVolunteers/$neededVolunteers",
+                      style: const TextStyle(
                           color: Colors.white, fontSize: 16)),
                 ],
               )
@@ -106,6 +213,7 @@ class ActivityDetailScreen extends StatelessWidget {
       ],
     );
   }
+
   Widget _buildContent(BuildContext context) {
     Widget _buildDetailInfo({
       required IconData icon,
@@ -150,7 +258,7 @@ class ActivityDetailScreen extends StatelessWidget {
                   child: _buildDetailInfo(
                     icon: Icons.location_on,
                     text: kegiatan["location"] as String? ?? 'Lokasi tidak tersedia',
-                    iconColor: Color(0xFFFE6B35),
+                    iconColor: const Color(0xFFFE6B35),
                   ),
                 ),
                 Expanded(
@@ -158,7 +266,7 @@ class ActivityDetailScreen extends StatelessWidget {
                   child: _buildDetailInfo(
                     icon: Icons.access_time,
                     text: kegiatan["time"] as String? ?? 'Belum ada waktu',
-                    iconColor: Color(0xFFFE6B35),
+                    iconColor: const Color(0xFFFE6B35),
                   ),
                 ),
                 Expanded(
@@ -166,14 +274,13 @@ class ActivityDetailScreen extends StatelessWidget {
                   child: _buildDetailInfo(
                     icon: Icons.calendar_today,
                     text: kegiatan["date"] as String? ?? '-',
-                    iconColor: Color(0xFFFE6B35),
+                    iconColor: const Color(0xFFFE6B35),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
 
-            // Nama Penyelenggara di atas Deskripsi
             _buildCreatorInfo(context, creatorUid),
 
             const Text("Deskripsi",
@@ -197,22 +304,17 @@ class ActivityDetailScreen extends StatelessWidget {
             Text(kegiatan["goal"] as String? ?? 'Tujuan kegiatan tidak dicantumkan.'),
 
             const SizedBox(height: 20),
-            const Text("Catatan",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 8),
-            Text(kegiatan["notes"] as String? ?? '-'),
+            _buildNotesInfoBox(kegiatan["notes"] as String? ?? ''),
           ],
         ),
       ),
     );
   }
-  // End of ActivityDetailScreenContent content
 
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = kegiatan["bgColor"] as Color? ?? Color(0xFF003E6A);
+    final Color bgColor = kegiatan["bgColor"] as Color? ?? const Color(0xFF003E6A);
 
     return Scaffold(
       backgroundColor: bgColor,

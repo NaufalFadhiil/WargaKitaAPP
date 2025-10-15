@@ -3,12 +3,19 @@ import '../widget/help_confirmation_dialog.dart';
 import '../service/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class HelpDetailScreen extends StatelessWidget {
+class HelpDetailScreen extends StatefulWidget {
   final Map<String, dynamic> helpItem;
+
+  const HelpDetailScreen({super.key, required this.helpItem});
+
+  @override
+  State<HelpDetailScreen> createState() => _HelpDetailScreenState();
+}
+
+class _HelpDetailScreenState extends State<HelpDetailScreen> {
   final UserService _userService = UserService();
   final String _currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
-
-  HelpDetailScreen({super.key, required this.helpItem});
+  String _creatorPhoneNumber = '';
 
   Widget _buildCreatorInfo(BuildContext context, String uid) {
     return FutureBuilder<Map<String, String>>(
@@ -18,7 +25,13 @@ class HelpDetailScreen extends StatelessWidget {
         final phoneNumber = snapshot.data?['phoneNumber'] ?? '';
 
         if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-          helpItem['phoneNumber'] = phoneNumber;
+          if (_creatorPhoneNumber != phoneNumber) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                _creatorPhoneNumber = phoneNumber;
+              });
+            });
+          }
         }
 
         return Padding(
@@ -26,7 +39,7 @@ class HelpDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 "Peminjam",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -41,7 +54,7 @@ class HelpDetailScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     creatorName,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       color: Colors.black,
@@ -57,20 +70,30 @@ class HelpDetailScreen extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final String creatorUid = helpItem["creatorUid"] as String? ?? 'dummy_uid';
+    final String creatorUid = widget.helpItem["creatorUid"] as String? ?? 'dummy_uid';
     final bool isCreator = creatorUid == _currentUid;
 
     void onBantuPressed() {
       if (isCreator) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text("Anda adalah peminjam. Anda tidak bisa membantu diri sendiri."),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 2),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else if (_creatorPhoneNumber.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Nomor telepon peminjam belum tersedia. Mohon tunggu sebentar."),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
           ),
         );
       } else {
-        showHelpConfirmDialog(context, helpItem);
+        final Map<String, dynamic> helpItemWithPhone = Map.from(widget.helpItem);
+        helpItemWithPhone['phoneNumber'] = _creatorPhoneNumber;
+        showHelpConfirmDialog(context, helpItemWithPhone);
       }
     }
 
@@ -80,7 +103,7 @@ class HelpDetailScreen extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
           child: Text(
-            helpItem["title"] as String? ?? 'Detail Bantuan',
+            widget.helpItem["title"] as String? ?? 'Detail Bantuan',
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -110,8 +133,8 @@ class HelpDetailScreen extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    final String creatorUid = helpItem["creatorUid"] as String? ?? 'dummy_uid';
-    final String location = helpItem["location"] as String? ?? 'Lokasi tidak tersedia';
+    final String creatorUid = widget.helpItem["creatorUid"] as String? ?? 'dummy_uid';
+    final String location = widget.helpItem["location"] as String? ?? 'Lokasi tidak tersedia';
 
     return Container(
       width: double.infinity,
@@ -148,14 +171,14 @@ class HelpDetailScreen extends StatelessWidget {
                 style: TextStyle(
                     fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 8),
-            Text(helpItem["needs"] as String? ?? 'Keperluan tidak dicantumkan.'),
+            Text(widget.helpItem["needs"] as String? ?? 'Keperluan tidak dicantumkan.'),
             const SizedBox(height: 20),
 
             const Text("Deskripsi Barang",
                 style: TextStyle(
                     fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 8),
-            Text(helpItem["description"] as String? ?? 'Deskripsi barang tidak tersedia.'),
+            Text(widget.helpItem["description"] as String? ?? 'Deskripsi barang tidak tersedia.'),
             const SizedBox(height: 20),
           ],
         ),

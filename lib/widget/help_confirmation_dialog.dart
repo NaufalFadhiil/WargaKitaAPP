@@ -5,13 +5,9 @@ import '../service/user_service.dart';
 void showHelpConfirmDialog(BuildContext context, Map<String, dynamic> helpItem) {
   final String creatorUid = helpItem["creatorUid"] as String? ?? 'dummy_uid';
   final String title = helpItem["title"] as String? ?? 'Detail Peminjaman';
-  final String location = helpItem["location"] as String? ?? 'Lokasi tidak tersedia';
-  // Mengambil nomor telepon yang sudah di-fetch dan disimpan di helpItem pada HelpDetailScreen
-  final String phoneNumber = helpItem["phoneNumber"] as String? ?? '';
+  final String location = helpItem["location"] as String? ?? 'Lokasi tidak tersedia';  final String phoneNumber = helpItem["phoneNumber"] as String? ?? '';
 
-  // Logic untuk meluncurkan WhatsApp
   void launchWhatsApp() async {
-    // Memastikan nomor telepon ada dan tidak kosong
     if (phoneNumber.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -21,12 +17,11 @@ void showHelpConfirmDialog(BuildContext context, Map<String, dynamic> helpItem) 
       return;
     }
 
-    // Format sudah dipastikan 62...
     final String whatsappUrl = "https://wa.me/$phoneNumber";
     final Uri uri = Uri.parse(whatsappUrl);
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication); // NEW: Menggunakan externalApplication
+    if (!await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -85,19 +80,16 @@ void showHelpConfirmDialog(BuildContext context, Map<String, dynamic> helpItem) 
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Detail Peminjaman
                           const Text("Detail Peminjaman", style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF003E6A))),
                           const SizedBox(height: 8),
 
-                          // Judul Peminjaman
                           Text(
                               title,
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16)),
                           const SizedBox(height: 15),
 
-                          // Lokasi
                           Row(
                             children: [
                               const Icon(Icons.location_on,
@@ -115,13 +107,11 @@ void showHelpConfirmDialog(BuildContext context, Map<String, dynamic> helpItem) 
                           ),
                           const SizedBox(height: 15),
 
-                          // Username Peminjam
                           Row(
                             children: [
                               CircleAvatar(
                                 radius: 18,
-                                // PERBAIKAN: Mengganti path image dummy
-                                backgroundImage: AssetImage("assets/profile1.jpeg"),
+                                backgroundImage: AssetImage("assets/images/profile1.jpeg"),
                               ),
                               const SizedBox(width: 10),
                               Column(
@@ -152,7 +142,7 @@ void showHelpConfirmDialog(BuildContext context, Map<String, dynamic> helpItem) 
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                launchWhatsApp(); // Launch WhatsApp
+                                launchWhatsApp();
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF003E6A),

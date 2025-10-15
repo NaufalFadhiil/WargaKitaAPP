@@ -81,7 +81,7 @@ class AddActivityController {
   String? validateTime(String? value) {
     if (validateRequired(value, 'Waktu') != null) return validateRequired(value, 'Waktu');
     if (!_timeRegex.hasMatch(value!)) {
-      return 'Format harus xx:xx.';
+      return 'Format harus 07:00.';
     }
     return null;
   }

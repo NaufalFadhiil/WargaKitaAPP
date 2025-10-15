@@ -14,6 +14,8 @@ class ActivityModel {
   final String whatsappLink;
   final String notes;
   final String creatorUid;
+  final int currentVolunteers;
+  final List<String> participantsUids;
 
   ActivityModel({
     this.id = '',
@@ -28,6 +30,8 @@ class ActivityModel {
     required this.whatsappLink,
     required this.notes,
     String? creatorUid,
+    this.currentVolunteers = 0,
+    this.participantsUids = const [],
   }) : this.creatorUid = creatorUid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
 
   Map<String, dynamic> toFirestore() {
@@ -43,12 +47,19 @@ class ActivityModel {
       'whatsappLink': whatsappLink,
       'notes': notes,
       'creatorUid': creatorUid,
+      'currentVolunteers': currentVolunteers,
+      'participantsUids': participantsUids,
       'createdAt': FieldValue.serverTimestamp(),
     };
   }
 
   factory ActivityModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+
+    final List<String> participants = (data['participantsUids'] is List)
+        ? List<String>.from(data['participantsUids'])
+        : [];
+
     return ActivityModel(
       id: doc.id,
       title: data['title'] as String? ?? 'No Title',
@@ -62,11 +73,14 @@ class ActivityModel {
       whatsappLink: data['whatsappLink'] as String? ?? '',
       notes: data['notes'] as String? ?? '',
       creatorUid: data['creatorUid'] as String? ?? 'dummy_uid',
+      currentVolunteers: data['currentVolunteers'] as int? ?? 0,
+      participantsUids: participants,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'title': title,
       'subtitle': description,
       'date': date,
@@ -79,6 +93,8 @@ class ActivityModel {
       'whatsappLink': whatsappLink,
       'notes': notes,
       'creatorUid': creatorUid,
+      'currentVolunteers': currentVolunteers,
+      'participantsUids': participantsUids,
     };
   }
 }

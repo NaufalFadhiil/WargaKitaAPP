@@ -69,8 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const Spacer(),
               if (logoutButton != null) logoutButton,
-              CircleAvatar(
-                backgroundImage: AssetImage(profileAsset),
+              const CircleAvatar(
+                backgroundImage: AssetImage("assets/images/profile1.jpeg"),
                 radius: 18,
               ),
             ],
@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: _activityController.activitiesStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
           return Center(child: Text("Error fetching activities: ${snapshot.error}"));
@@ -124,7 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         final activities = snapshot.data!;
-        const List<Color> fixedBgColors = [Color(0xFF003366), Colors.orange, Colors.blueGrey];
+        const List<Color> bgColors = [Color(0xFF003366), Color(0xFFFE6B35), Colors.blueGrey];
+
 
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -133,12 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ...activities.asMap().entries.map((entry) {
                 final index = entry.key;
                 final activity = entry.value;
-                final bgColor = fixedBgColors[index % fixedBgColors.length];
-                const List<String> dummyAvatars = [
-                  "assets/profile2.jpeg",
-                  "assets/profile3.jpeg",
-                  "assets/profile4.jpeg",
-                ];
+                final bgColor = bgColors[index % bgColors.length];
 
                 return GestureDetector(
                   onTap: () {
@@ -154,7 +150,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     date: activity.date,
                     time: activity.time,
                     location: activity.location,
-                    avatars: dummyAvatars,
+                    neededVolunteers: activity.neededVolunteers,
+                    currentVolunteers: activity.currentVolunteers,
                     bgColor: bgColor,
                   ),
                 );
@@ -172,8 +169,8 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: _helpController.helpRequestsStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: Padding(
-            padding: const EdgeInsets.all(16.0),
+          return const Center(child: Padding(
+            padding: EdgeInsets.all(16.0),
             child: CircularProgressIndicator(),
           ));
         }

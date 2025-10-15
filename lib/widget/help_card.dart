@@ -37,7 +37,7 @@ class HelpCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle,
-            maxLines: 4,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 14, color: Colors.black54),
           ),

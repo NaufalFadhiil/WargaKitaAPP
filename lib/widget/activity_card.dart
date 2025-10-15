@@ -6,8 +6,9 @@ class ActivityCard extends StatelessWidget {
   final String date;
   final String time;
   final String location;
-  final List<String> avatars;
+  final String neededVolunteers;
   final Color bgColor;
+  final int currentVolunteers;
 
   const ActivityCard({
     super.key,
@@ -16,8 +17,9 @@ class ActivityCard extends StatelessWidget {
     required this.date,
     required this.time,
     required this.location,
-    required this.avatars,
+    required this.neededVolunteers,
     required this.bgColor,
+    this.currentVolunteers = 0,
   });
 
   @override
@@ -49,7 +51,7 @@ class ActivityCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: Colors.white70),
           ),
@@ -134,22 +136,17 @@ class ActivityCard extends StatelessWidget {
   Widget _buildParticipantsRow() {
     return Row(
       children: [
-        for (var avatar in avatars.take(3))
-          Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: CircleAvatar(
-              radius: 14,
-              backgroundImage: AssetImage(avatar),
-            ),
-          ),
-        const SizedBox(width: 4),
-        Expanded(
-          child: Text(
-            avatars.length > 3 ? "+${avatars.length - 3} Orang" : "Beberapa Orang",
-            style: const TextStyle(color: Colors.white),
-            overflow: TextOverflow.ellipsis,
+        const Icon(Icons.person_2_outlined, color: Colors.white, size: 28),
+        const SizedBox(width: 8),
+        Text(
+          "$currentVolunteers/$neededVolunteers",
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
         ),
+        const Spacer(),
         const Icon(
           Icons.arrow_forward_ios,
           size: 16,
