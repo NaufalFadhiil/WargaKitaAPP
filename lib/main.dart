@@ -7,6 +7,7 @@ import 'package:warga_kita_app/screen/activity_detail_screen.dart';
 import 'package:warga_kita_app/screen/home_screen.dart';
 import 'package:warga_kita_app/screen/login_screen.dart';
 import 'package:warga_kita_app/screen/onboarding_screen.dart';
+import 'package:warga_kita_app/screen/profile_page.dart';
 import 'package:warga_kita_app/screen/register_screen.dart';
 import 'package:warga_kita_app/screen/splash_screen.dart';
 import 'package:warga_kita_app/style/theme/wargakita_theme.dart';
@@ -32,22 +33,23 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
-        '/start' : (context) => const GetStartedApp(),
+        '/start': (context) => const GetStartedApp(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
+        '/profile': (context) => const ProfilePage(),
         '/detail-kegiatan': (context) {
           final args =
-          ModalRoute.of(context)!.settings.arguments
-          as Map<String, dynamic>;
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
           return ActivityDetailScreen(kegiatan: args);
         },
         '/add-activity': (context) => const AddActivityScreen(),
         '/add-help': (context) => const AddHelpScreen(),
         '/help-detail': (context) {
           final args =
-          ModalRoute.of(context)!.settings.arguments
-          as Map<String, dynamic>;
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
           return HelpDetailScreen(helpItem: args);
         },
       },

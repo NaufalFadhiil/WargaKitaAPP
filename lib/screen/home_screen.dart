@@ -42,6 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
     showAddSelectionModal(context);
   }
 
+  void _navigateToProfile() {
+    Navigator.pushNamed(context, '/profile');
+  }
+
   Widget _buildHeaderSection({
     required String userName,
     required String date,
@@ -69,9 +73,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const Spacer(),
               if (logoutButton != null) logoutButton,
-              const CircleAvatar(
-                backgroundImage: AssetImage("assets/images/profile1.jpeg"),
-                radius: 18,
+              GestureDetector(
+                  onTap: _navigateToProfile,
+                child: const CircleAvatar(
+                  backgroundImage: AssetImage("assets/images/profile1.jpeg"),
+                  radius: 18,
+                ),
               ),
             ],
           ),
