@@ -6,6 +6,7 @@ import 'package:warga_kita_app/screen/add_help_screen.dart';
 import 'package:warga_kita_app/screen/activity_detail_screen.dart';
 import 'package:warga_kita_app/screen/home_screen.dart';
 import 'package:warga_kita_app/screen/login_screen.dart';
+import 'package:warga_kita_app/screen/onboarding_screen.dart';
 import 'package:warga_kita_app/screen/register_screen.dart';
 import 'package:warga_kita_app/screen/splash_screen.dart';
 import 'package:warga_kita_app/style/theme/wargakita_theme.dart';
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
+        '/start' : (context) => const GetStartedApp(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
