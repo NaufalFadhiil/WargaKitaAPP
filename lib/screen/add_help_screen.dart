@@ -36,12 +36,16 @@ class FormInputField extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               if (isOptional)
                 Text(
                   " (opsional)",
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.grey,
+                  ),
                 ),
             ],
           ),
@@ -52,8 +56,13 @@ class FormInputField extends StatelessWidget {
             validator: validator,
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.grey,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: WargaKitaColors.primary.color),
@@ -64,13 +73,16 @@ class FormInputField extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: WargaKitaColors.primary.color, width: 2),
+                borderSide: BorderSide(
+                  color: WargaKitaColors.primary.color,
+                  width: 2,
+                ),
               ),
               suffixIcon: suffixIcon != null
                   ? IconButton(
-                icon: Icon(suffixIcon, color: theme.primaryColor),
-                onPressed: onSuffixIconTap,
-              )
+                      icon: Icon(suffixIcon, color: theme.primaryColor),
+                      onPressed: onSuffixIconTap,
+                    )
                   : null,
             ),
           ),
@@ -79,7 +91,6 @@ class FormInputField extends StatelessWidget {
     );
   }
 }
-
 
 class AddHelpScreen extends StatefulWidget {
   const AddHelpScreen({super.key});
@@ -121,15 +132,9 @@ class _AddHelpScreenState extends State<AddHelpScreen> {
         title: const Text("Tambah Peminjaman"),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.chevron_left, size: 35),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmark_border),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -142,27 +147,31 @@ class _AddHelpScreenState extends State<AddHelpScreen> {
                 controller: _controller.titleController,
                 title: "Judul Peminjaman",
                 hintText: "Contoh: Pinjam Sound System",
-                validator: (value) => _controller.validateRequired(value, 'Judul peminjaman'),
+                validator: (value) =>
+                    _controller.validateRequired(value, 'Judul peminjaman'),
               ),
               FormInputField(
                 controller: _controller.locationController,
                 title: "Titik Bertemu/Lokasi Kegiatan",
                 hintText: "Contoh: Rumah Pak RT 01",
-                validator: (value) => _controller.validateRequired(value, 'Titik bertemu'),
+                validator: (value) =>
+                    _controller.validateRequired(value, 'Titik bertemu'),
               ),
               FormInputField(
                 controller: _controller.purposeController,
                 title: "Keperluan (Tujuan Peminjaman)",
                 hintText: "Tujuan peminjaman",
                 isLarge: true,
-                validator: (value) => _controller.validateRequired(value, 'Keperluan'),
+                validator: (value) =>
+                    _controller.validateRequired(value, 'Keperluan'),
               ),
               FormInputField(
                 controller: _controller.itemDescriptionController,
                 title: "Deskripsi Barang",
                 hintText: "Jelaskan barang yang ingin Anda pinjam",
                 isLarge: true,
-                validator: (value) => _controller.validateRequired(value, 'Deskripsi barang'),
+                validator: (value) =>
+                    _controller.validateRequired(value, 'Deskripsi barang'),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -172,7 +181,9 @@ class _AddHelpScreenState extends State<AddHelpScreen> {
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(
                     "Tambahkan",

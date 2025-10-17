@@ -16,6 +16,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  bool _isPasswordVisible = false;
+  void _togglePasswordVisibility() {
+    setState(() {
+      _isPasswordVisible = !_isPasswordVisible;
+    });
+  }
+
   void _showSuccessSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -45,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _showSuccessSnackbar("Login Berhasil! Selamat datang di Community.");
 
         await Future.delayed(const Duration(milliseconds: 500));
-        
+
         Navigator.of(context).pushReplacementNamed('/home');
       } on FirebaseAuthException catch (e) {
         String errorMessage = 'Login Gagal.';
@@ -117,6 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: WargaKitaInputDecoration(
                       icon: Icons.email,
                       labelText: 'Email',
+                      hintText: 'Masukkan email',
                     ),
                   ),
 
@@ -124,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   TextFormField(
                     controller: _passwordController,
-                    obscureText: true,
+                    obscureText: !_isPasswordVisible,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Password wajib diisi";
@@ -133,7 +141,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     decoration: WargaKitaInputDecoration(
                       icon: Icons.lock,
-                      labelText: 'Masukkan password',
+                      labelText: 'Masukkan Password',
+                      hintText: 'Minimal 6 Karakter',
+
+                      suffixIcon: _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      onSuffixIconTap: _togglePasswordVisibility,
                     ),
                   ),
 

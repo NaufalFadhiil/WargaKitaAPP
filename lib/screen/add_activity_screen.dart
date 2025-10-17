@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 import '../controller/add_activity_controller.dart';
 import '../style/colors/wargakita_colors.dart';
 
@@ -36,12 +37,17 @@ class FormInputField extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: WargaKitaTextStyles.bodyMedium.copyWith(
+                  color: WargaKitaColors.black.color,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               if (isOptional)
                 Text(
                   " (opsional)",
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  style: WargaKitaTextStyles.bodySmall.copyWith(
+                    color: WargaKitaColors.black.color,
+                  ),
                 ),
             ],
           ),
@@ -52,8 +58,13 @@ class FormInputField extends StatelessWidget {
             validator: validator,
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.grey,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: WargaKitaColors.primary.color),
@@ -64,13 +75,16 @@ class FormInputField extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: WargaKitaColors.primary.color, width: 2),
+                borderSide: BorderSide(
+                  color: WargaKitaColors.primary.color,
+                  width: 2,
+                ),
               ),
               suffixIcon: suffixIcon != null
                   ? IconButton(
-                icon: Icon(suffixIcon, color: theme.primaryColor),
-                onPressed: onSuffixIconTap,
-              )
+                      icon: Icon(suffixIcon, color: theme.primaryColor),
+                      onPressed: onSuffixIconTap,
+                    )
                   : null,
             ),
           ),
@@ -79,7 +93,6 @@ class FormInputField extends StatelessWidget {
     );
   }
 }
-
 
 class AddActivityScreen extends StatefulWidget {
   const AddActivityScreen({super.key});
@@ -121,15 +134,9 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
         title: const Text("Tambah Kegiatan"),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.chevron_left, size: 35),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmark_border),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -141,7 +148,8 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                 controller: _controller.titleController,
                 title: "Judul Kegiatan",
                 hintText: "Contoh: Perayaan 17 Agustus Desa Sukamaju",
-                validator: (value) => _controller.validateRequired(value, 'Judul kegiatan'),
+                validator: (value) =>
+                    _controller.validateRequired(value, 'Judul kegiatan'),
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,7 +185,10 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                       controller: _controller.locationController,
                       title: "Lokasi Kegiatan",
                       hintText: "Contoh: Rumah Pak RT 01",
-                      validator: (value) => _controller.validateRequired(value, 'Lokasi kegiatan'),
+                      validator: (value) => _controller.validateRequired(
+                        value,
+                        'Lokasi kegiatan',
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -196,27 +207,31 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                 title: "Deskripsi Kegiatan",
                 hintText: "Jelaskan kegiatan yang ingin anda buat",
                 isLarge: true,
-                validator: (value) => _controller.validateRequired(value, 'Deskripsi kegiatan'),
+                validator: (value) =>
+                    _controller.validateRequired(value, 'Deskripsi kegiatan'),
               ),
               FormInputField(
                 controller: _controller.aidController,
                 title: "Kebutuhan Bantuan",
                 hintText: "Contoh: Tenda, 50 kursi, Sumbangan makanan",
                 isLarge: true,
-                validator: (value) => _controller.validateRequired(value, 'Kebutuhan bantuan'),
+                validator: (value) =>
+                    _controller.validateRequired(value, 'Kebutuhan bantuan'),
               ),
               FormInputField(
                 controller: _controller.goalController,
                 title: "Tujuan Kegiatan",
                 hintText: "Contoh: Mempererat tali silaturahmi antar warga",
                 isLarge: true,
-                validator: (value) => _controller.validateRequired(value, 'Tujuan kegiatan'),
+                validator: (value) =>
+                    _controller.validateRequired(value, 'Tujuan kegiatan'),
               ),
               FormInputField(
                 controller: _controller.whatsappController,
                 title: "Link Grup WhatsApp",
                 hintText: "https://chat.whatsapp.com/grup-acara-desa",
-                validator: (value) => _controller.validateRequired(value, 'Link Grup WhatsApp'),
+                validator: (value) =>
+                    _controller.validateRequired(value, 'Link Grup WhatsApp'),
               ),
               FormInputField(
                 controller: _controller.notesController,
@@ -233,7 +248,9 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(
                     "Tambahkan",

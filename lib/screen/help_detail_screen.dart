@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
+import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 import '../widget/help_confirmation_dialog.dart';
 import '../service/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,7 +26,8 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
         final creatorName = snapshot.data?['username'] ?? 'Memuat...';
         final phoneNumber = snapshot.data?['phoneNumber'] ?? '';
 
-        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData) {
           if (_creatorPhoneNumber != phoneNumber) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               setState(() {
@@ -35,32 +38,34 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
         }
 
         return Padding(
-          padding: const EdgeInsets.only(top: 8, bottom: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
-                "Peminjam",
-                style: TextStyle(
+              Text(
+                "Peminjam:",
+                style: WargaKitaTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.black54,
+                  color: WargaKitaColors.secondary.color,
                 ),
               ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(Icons.person, color: Theme.of(context).primaryColor, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    creatorName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.person,
+                color: WargaKitaColors.primary.color,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              // Expanded agar nama panjang tidak memaksa overflow
+              Expanded(
+                child: Text(
+                  creatorName,
+                  style: WargaKitaTextStyles.bodyMedium.copyWith(
+                    color: WargaKitaColors.black.color,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
@@ -70,14 +75,17 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final String creatorUid = widget.helpItem["creatorUid"] as String? ?? 'dummy_uid';
+    final String creatorUid =
+        widget.helpItem["creatorUid"] as String? ?? 'dummy_uid';
     final bool isCreator = creatorUid == _currentUid;
 
     void onBantuPressed() {
       if (isCreator) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Anda adalah peminjam. Anda tidak bisa membantu diri sendiri."),
+            content: Text(
+              "Anda adalah peminjam. Anda tidak bisa membantu diri sendiri.",
+            ),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
           ),
@@ -85,13 +93,17 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
       } else if (_creatorPhoneNumber.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Nomor telepon peminjam belum tersedia. Mohon tunggu sebentar."),
+            content: Text(
+              "Nomor telepon peminjam belum tersedia. Mohon tunggu sebentar.",
+            ),
             backgroundColor: Colors.orange,
             duration: Duration(seconds: 2),
           ),
         );
       } else {
-        final Map<String, dynamic> helpItemWithPhone = Map.from(widget.helpItem);
+        final Map<String, dynamic> helpItemWithPhone = Map.from(
+          widget.helpItem,
+        );
         helpItemWithPhone['phoneNumber'] = _creatorPhoneNumber;
         showHelpConfirmDialog(context, helpItemWithPhone);
       }
@@ -101,13 +113,21 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
-          child: Text(
-            widget.helpItem["title"] as String? ?? 'Detail Bantuan',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 27,
+          padding: const EdgeInsets.only(
+            top: 20,
+            left: 20,
+            right: 20,
+            bottom: 10,
+          ),
+          child: Center(
+            child: Text(
+              widget.helpItem["title"] as String? ?? 'Detail Bantuan',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 27,
+              ),
             ),
           ),
         ),
@@ -116,7 +136,9 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
           child: ElevatedButton(
             onPressed: onBantuPressed,
             style: ElevatedButton.styleFrom(
-              backgroundColor: isCreator ? Colors.grey : const Color(0xFFFE6B35),
+              backgroundColor: isCreator
+                  ? Colors.grey
+                  : const Color(0xFFFE6B35),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -133,8 +155,10 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
   }
 
   Widget _buildContent(BuildContext context) {
-    final String creatorUid = widget.helpItem["creatorUid"] as String? ?? 'dummy_uid';
-    final String location = widget.helpItem["location"] as String? ?? 'Lokasi tidak tersedia';
+    final String creatorUid =
+        widget.helpItem["creatorUid"] as String? ?? 'dummy_uid';
+    final String location =
+        widget.helpItem["location"] as String? ?? 'Lokasi tidak tersedia';
 
     return Container(
       width: double.infinity,
@@ -147,38 +171,74 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Titik Bertemu/Lokasi Kegiatan",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              "Titik Bertemu/Lokasi Kegiatan",
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: WargaKitaColors.black.color,
+              ),
+            ),
             const SizedBox(height: 8),
+
             Row(
               children: [
-                const Icon(Icons.location_on,
-                    color: Color(0xFFFE6B35)),
-                const SizedBox(width: 8),
+                Icon(Icons.location_on, color: WargaKitaColors.secondary.color),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     location,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: WargaKitaTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: WargaKitaColors.black.color,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
 
+            const SizedBox(height: 5),
+
             _buildCreatorInfo(context, creatorUid),
 
-            const Text("Keperluan",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 8),
-            Text(widget.helpItem["needs"] as String? ?? 'Keperluan tidak dicantumkan.'),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            const Divider(thickness: 2, height: 15, color: Color(0xFFEDEDED)),
 
-            const Text("Deskripsi Barang",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              "Keperluan",
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: WargaKitaColors.black.color,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(widget.helpItem["description"] as String? ?? 'Deskripsi barang tidak tersedia.'),
+            Text(
+              widget.helpItem["needs"] as String? ??
+                  'Keperluan tidak dicantumkan.',
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                color: WargaKitaColors.black.color,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+            const Divider(thickness: 2, height: 15, color: Color(0xFFEDEDED)),
+
+            Text(
+              "Deskripsi Barang",
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: WargaKitaColors.black.color,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              widget.helpItem["description"] as String? ??
+                  'Deskripsi barang tidak tersedia.',
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                color: WargaKitaColors.black.color,
+              ),
+            ),
+
             const SizedBox(height: 20),
           ],
         ),
@@ -188,29 +248,44 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF003E6A),
+      backgroundColor: theme.primaryColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const BackButton(color: Colors.white),
-        title: const Text("Detail Bantu",
-            style: TextStyle(color: Colors.white)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmark_border, color: Colors.white),
-            onPressed: () {},
-          )
-        ],
+        leading: Padding(
+          padding: EdgeInsets.only(left: 16),
+          child: InkWell(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              child: const Icon(
+                Icons.chevron_left,
+                color: Colors.white,
+                size: 35,
+              ),
+            ),
+          ),
+        ),
+        title: Text(
+          "Detail Bantu",
+          style: WargaKitaTextStyles.headlineLarge.copyWith(
+            fontSize: 20,
+            color: WargaKitaColors.white.color,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(context),
-            Expanded(
-              child: _buildContent(context),
-            ),
+            Expanded(child: _buildContent(context)),
           ],
         ),
       ),
