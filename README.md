@@ -36,7 +36,7 @@ Setiap pengguna memiliki profil sederhana berisi nama, dan kontak, untuk membang
 | **URL Launcher**           | Membuka tautan eksternal seperti WhatsApp atau telepon        |
 | **Provider**               | Manajemen state aplikasi                                      |
 | **Flutter Launcher Icons** | Generasi ikon aplikasi otomatis                               |
-| **Google Fonts & Shimmer** | Styling teks dengan font kustom Montserrat                    |
+| **Google Fonts**           | Styling teks dengan font kustom Montserrat                    |
 
 **Batasan Proyek (Out of Scope):** 
 1. Tidak ada sistem pembayaran atau transaksi keuangan.
