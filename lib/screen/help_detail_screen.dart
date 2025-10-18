@@ -18,6 +18,16 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
   final UserService _userService = UserService();
   final String _currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
   String _creatorPhoneNumber = '';
+  late List<String> _helpersUids;
+
+  @override
+  void initState() {
+    super.initState();
+    _helpersUids = (widget.helpItem["helpersUids"] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .toList() ??
+        [];
+  }
 
   Widget _buildCreatorInfo(BuildContext context, String uid) {
     return FutureBuilder<Map<String, String>>(
@@ -56,7 +66,6 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
                 size: 20,
               ),
               const SizedBox(width: 8),
-              // Expanded agar nama panjang tidak memaksa overflow
               Expanded(
                 child: Text(
                   creatorName,
@@ -78,6 +87,7 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
     final String creatorUid =
         widget.helpItem["creatorUid"] as String? ?? 'dummy_uid';
     final bool isCreator = creatorUid == _currentUid;
+    final bool hasHelped = _helpersUids.contains(_currentUid);
 
     void onBantuPressed() {
       if (isCreator) {
@@ -109,6 +119,20 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
       }
     }
 
+    String buttonText = "Bantu";
+    Color buttonColor = const Color(0xFFFE6B35);
+    bool isDisabled = false;
+
+    if (isCreator) {
+      buttonText = "Anda Adalah Peminjam";
+      buttonColor = Colors.white;
+      isDisabled = true;
+    } else if (hasHelped) {
+      buttonText = "Sudah Menawarkan Bantuan";
+      buttonColor = Colors.white;
+      isDisabled = true;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -134,11 +158,9 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: ElevatedButton(
-            onPressed: onBantuPressed,
+            onPressed: isDisabled ? null : onBantuPressed,
             style: ElevatedButton.styleFrom(
-              backgroundColor: isCreator
-                  ? Colors.grey
-                  : const Color(0xFFFE6B35),
+              backgroundColor: buttonColor,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -146,7 +168,13 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            child: Text(isCreator ? "Anda Adalah Peminjam" : "Bantu"),
+            child: Text(
+              buttonText,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 25),
@@ -255,15 +283,15 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Padding(
-          padding: EdgeInsets.only(left: 16),
+          padding: const EdgeInsets.only(left: 16),
           child: InkWell(
             onTap: () {
               Navigator.pop(context);
             },
-            child: Container(
+            child: const SizedBox(
               width: 40,
               height: 40,
-              child: const Icon(
+              child: Icon(
                 Icons.chevron_left,
                 color: Colors.white,
                 size: 35,

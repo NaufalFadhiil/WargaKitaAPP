@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import '../style/colors/wargakita_colors.dart';
 
-class LogoutButton extends StatelessWidget {
-  const LogoutButton({super.key});
+Future<void> performLogout(BuildContext context) async {
+  if (!context.mounted) return;
 
-  void _onLogout(BuildContext context) async {
-    try {
-      await FirebaseAuth.instance.signOut();
+  try {
+    await FirebaseAuth.instance.signOut();
 
+    if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text("Anda telah berhasil logout."),
@@ -16,27 +16,62 @@ class LogoutButton extends StatelessWidget {
           duration: const Duration(seconds: 2),
         ),
       );
-      await Future.delayed(const Duration(milliseconds: 500));
+    }
 
-      Navigator.of(
-        context,
-      ).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
-    } catch (e) {
+    if (context.mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/login',
+            (Route<dynamic> route) => false,
+      );
+    }
+  } catch (e) {
+    if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Gagal logout. Silakan coba lagi.")),
       );
     }
   }
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => _onLogout(context),
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Icon(Icons.logout, color: WargaKitaColors.white.color, size: 24),
-      ),
-    );
-  }
+void showLogoutConfirmationDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          "Konfirmasi Logout",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Text("Apakah Anda yakin ingin keluar dari akun ini?"),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              "Batal",
+              style: TextStyle(color: WargaKitaColors.primary.color),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              performLogout(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: WargaKitaColors.secondary.color,
+              foregroundColor: WargaKitaColors.white.color,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text("Logout"),
+          ),
+        ],
+      );
+    },
+  );
 }

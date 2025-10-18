@@ -1,11 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../service/user_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+Future<void> _recordHelper(BuildContext context, String helpId, String helperUid) async {
+  if (helpId.isEmpty) return;
+
+  try {
+    final helpRef = FirebaseFirestore.instance.collection('help_requests').doc(helpId);
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final docSnapshot = await transaction.get(helpRef);
+
+      if (!docSnapshot.exists) {
+        throw Exception("Permintaan bantuan tidak ditemukan.");
+      }
+
+      final data = docSnapshot.data();
+      final List<String> helpers = (data?['helpersUids'] is List)
+          ? List<String>.from(data?['helpersUids'])
+          : [];
+
+      if (helpers.contains(helperUid)) {
+        return;
+      }
+
+      transaction.update(helpRef, {
+        'helpersUids': FieldValue.arrayUnion([helperUid]),
+      });
+    });
+
+  } catch (e) {
+    print('Error recording helper: $e');
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mencatat bantuan: ${e.toString()}')),
+      );
+    }
+  }
+}
 
 void showHelpConfirmDialog(BuildContext context, Map<String, dynamic> helpItem) {
+  final String helpId = helpItem["id"] as String? ?? '';
   final String creatorUid = helpItem["creatorUid"] as String? ?? 'dummy_uid';
   final String title = helpItem["title"] as String? ?? 'Detail Peminjaman';
-  final String location = helpItem["location"] as String? ?? 'Lokasi tidak tersedia';  final String phoneNumber = helpItem["phoneNumber"] as String? ?? '';
+  final String location = helpItem["location"] as String? ?? 'Lokasi tidak tersedia';
+  final String phoneNumber = helpItem["phoneNumber"] as String? ?? '';
+  final String currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   void launchWhatsApp() async {
     if (phoneNumber.isEmpty) {
@@ -109,7 +151,7 @@ void showHelpConfirmDialog(BuildContext context, Map<String, dynamic> helpItem) 
 
                           Row(
                             children: [
-                              CircleAvatar(
+                              const CircleAvatar(
                                 radius: 18,
                                 backgroundImage: AssetImage("assets/images/profile1.jpeg"),
                               ),
@@ -142,6 +184,7 @@ void showHelpConfirmDialog(BuildContext context, Map<String, dynamic> helpItem) 
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
+                                _recordHelper(context, helpId, currentUid);
                                 launchWhatsApp();
                               },
                               style: ElevatedButton.styleFrom(

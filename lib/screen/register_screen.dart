@@ -262,7 +262,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       decoration: WargaKitaInputDecoration(
                         icon: Icons.phone,
                         labelText: 'Nomor Telepon',
-                        hintText: '08xxxxxxxxx',
+                        hintText: '62xxxxxxxxx',
                       ),
                     ),
                     const SizedBox(height: 21),

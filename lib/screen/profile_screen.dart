@@ -1,7 +1,63 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:warga_kita_app/service/user_record_service.dart';
+import '../service/user_service.dart';
+import '../widget/logout_button.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final UserService _userService = UserService();
+  final UserActivityService _activityService = UserActivityService();
+  String _username = 'Memuat...';
+  String _phoneNumber = 'Memuat...';
+  String _currentUid = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _currentUid = user.uid;
+      final userData = await _userService.getUserData(user.uid);
+      setState(() {
+        _username = userData['username'] ?? 'Pengguna Tidak Ditemukan';
+        _phoneNumber = userData['phoneNumber'] ?? 'Nomor Tidak Tersedia';
+      });
+    } else {
+      setState(() {
+        _username = 'Belum Login';
+        _phoneNumber = 'Tidak Ada Data';
+      });
+    }
+  }
+
+  Future<Map<String, int>> _loadActivityCounters() async {
+    if (_currentUid.isEmpty) return {};
+
+    final results = await Future.wait([
+      _activityService.getCreatedActivitiesCount(),
+      _activityService.getJoinedActivitiesCount(),
+      _activityService.getCreatedHelpRequestsCount(),
+      _activityService.getHelpedRequestsCount(),
+    ]);
+
+    return {
+      'created_activity': results[0],
+      'joined_activity': results[1],
+      'created_help': results[2],
+      'helped_help': results[3],
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +71,8 @@ class ProfilePage extends StatelessWidget {
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xFF2E4A6F), 
-                    Color(0xFF6A5ACD), 
+                    Color(0xFF2E4A6F),
+                    Color(0xFF6A5ACD),
                   ],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
@@ -76,7 +132,7 @@ class ProfilePage extends StatelessWidget {
                           ),
                           child: const CircleAvatar(
                             radius: 55,
-                            backgroundImage: AssetImage('assets/profile1.jpeg'),
+                            backgroundImage: AssetImage('assets/images/profile1.jpeg'),
                           ),
                         ),
                         Positioned(
@@ -120,10 +176,10 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     "Account",
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -132,98 +188,111 @@ class ProfilePage extends StatelessWidget {
                       color: Color(0xFF204B69),
                     ),
                   ),
-                  Divider(),
-                  SizedBox(height: 8),
+                  const Divider(),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         "Nama",
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
-                      Text("Afif Sasonda"),
+                      Text(_username),
                     ],
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         "Nomor",
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
-                      Text("0895371933308"),
+                      Text(_phoneNumber),
                     ],
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  const Center(
-                    child: Text(
-                      "Riwayat",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2E4A6F),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 2.7,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: const [
-                      _RiwayatCard(
-                        title: "Bikin Acara",
-                        count: "5",
-                        gradientColors: [Color(0xFF2E4A6F), Color(0xFF6A5ACD)],
-                        icon: Icons.trending_up,
-                      ),
-                      _RiwayatCard(
-                        title: "Ikut Bantu Acara",
-                        count: "5",
-                        gradientColors: [Color(0xFFFF7043), Color(0xFFFFA726)],
-                        icon: Icons.trending_up,
-                      ),
-                      _RiwayatCard(
-                        title: "Bikin Pinjaman",
-                        count: "5",
-                        gradientColors: [Color(0xFF2E4A6F), Color(0xFF6A5ACD)],
-                        icon: Icons.trending_up,
-                      ),
-                      _RiwayatCard(
-                        title: "Bantu Pinjaman",
-                        count: "5",
-                        gradientColors: [Color(0xFFFF7043), Color(0xFFFFA726)],
-                        icon: Icons.trending_up,
+            FutureBuilder<Map<String, int>>(
+              future: _loadActivityCounters(),
+              builder: (context, snapshot) {
+                final data = snapshot.data ??
+                    {
+                      'created_activity': 0,
+                      'joined_activity': 0,
+                      'created_help': 0,
+                      'helped_help': 0,
+                    };
+
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                ],
-              ),
+                  child: Column(
+                    children: [
+                      const Center(
+                        child: Text(
+                          "Riwayat",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2E4A6F),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 2.7,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          _RecordCard(
+                            title: "Bikin Acara",
+                            count: data['created_activity']?.toString() ?? '0',
+                            gradientColors: const [Color(0xFF2E4A6F), Color(0xFF6A5ACD)],
+                            icon: Icons.event,
+                          ),
+                          _RecordCard(
+                            title: "Ikut Bantu Acara",
+                            count: data['joined_activity']?.toString() ?? '0',
+                            gradientColors: const [Color(0xFFFF7043), Color(0xFFFFA726)],
+                            icon: Icons.volunteer_activism,
+                          ),
+                          _RecordCard(
+                            title: "Bikin Pinjaman",
+                            count: data['created_help']?.toString() ?? '0',
+                            gradientColors: const [Color(0xFF2E4A6F), Color(0xFF6A5ACD)],
+                            icon: Icons.handshake,
+                          ),
+                          _RecordCard(
+                            title: "Bantu Pinjaman",
+                            count: data['helped_help']?.toString() ?? '0',
+                            gradientColors: const [Color(0xFFFF7043), Color(0xFFFFA726)],
+                            icon: Icons.handshake_outlined,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-            const SizedBox(height: 10), 
+            const SizedBox(height: 10),
             Container(
               width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -265,15 +334,15 @@ class ProfilePage extends StatelessWidget {
                     children: const [
                       Expanded(
                         child: _DeveloperItem(
-                          name: "Afif Dwi Sasonda",
-                          id: "BC25B087",
+                          name: "Riyando Rajagukguk",
+                          id: "BC25B055",
                         ),
                       ),
                       SizedBox(width: 10),
                       Expanded(
                         child: _DeveloperItem(
-                          name: "Helmi Shidiqi",
-                          id: "BC25B062",
+                          name: "Naufal Fadhiil",
+                          id: "BC25B059",
                         ),
                       ),
                     ],
@@ -284,15 +353,15 @@ class ProfilePage extends StatelessWidget {
                     children: const [
                       Expanded(
                         child: _DeveloperItem(
-                          name: "Naufal Fadhil",
-                          id: "BC25B059",
+                          name: "Helmi Shidqi",
+                          id: "BC25B062",
                         ),
                       ),
                       SizedBox(width: 10),
                       Expanded(
                         child: _DeveloperItem(
-                          name: "Riyando Rajagukguk",
-                          id: "BC25B055",
+                          name: "Afif Dwi Sasonda",
+                          id: "BC25B087",
                         ),
                       ),
                     ],
@@ -315,7 +384,7 @@ class ProfilePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => showLogoutConfirmationDialog(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
@@ -330,7 +399,7 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 30), 
+            const SizedBox(height: 30),
           ],
         ),
       ),
@@ -338,13 +407,13 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-class _RiwayatCard extends StatelessWidget {
+class _RecordCard extends StatelessWidget {
   final String title;
   final String count;
   final List<Color> gradientColors;
   final IconData icon;
 
-  const _RiwayatCard({
+  const _RecordCard({
     required this.title,
     required this.count,
     required this.gradientColors,

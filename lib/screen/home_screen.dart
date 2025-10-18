@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
-import 'package:warga_kita_app/widget/logout_button.dart';
 import '../controller/display_activity_controller.dart';
 import '../controller/display_help_controler.dart';
 import '../data/activity_model.dart';
@@ -51,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
     required String userName,
     required String date,
     required String profileAsset,
-    Widget? logoutButton,
   }) {
     return Container(
       width: double.infinity,
@@ -76,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const Spacer(),
-              if (logoutButton != null) logoutButton,
               GestureDetector(
                 onTap: _navigateToProfile,
                 child: const CircleAvatar(
@@ -206,42 +203,41 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         if (snapshot.hasError) {
           return Center(
-            child: Padding(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text("Error fetching help requests: ${snapshot.error}"),
+              ));
+              }
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text("Error fetching help requests: ${snapshot.error}"),
-            ),
-          );
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Belum ada permintaan bantuan.",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          );
-        }
-
-        final helpItems = snapshot.data!;
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: helpItems.length,
-          itemBuilder: (context, index) {
-            final item = helpItems[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  '/help-detail',
-                  arguments: item.toMap(),
-                );
-              },
-              child: HelpCard(title: item.title, subtitle: item.purpose),
+              child: Text(
+                "Belum ada permintaan bantuan.",
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             );
-          },
-        );
-      },
+          }
+
+          final helpItems = snapshot.data!;
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: helpItems.length,
+            itemBuilder: (context, index) {
+              final item = helpItems[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/help-detail',
+                    arguments: item.toMap(),
+                  );
+                },
+                child: HelpCard(title: item.title, subtitle: item.purpose),
+              );
+            },
+          );
+        },
     );
   }
 
@@ -264,7 +260,6 @@ class _HomeScreenState extends State<HomeScreen> {
               userName: userName,
               date: _currentDate,
               profileAsset: "assets/images/profile1.jpeg",
-              logoutButton: const LogoutButton(),
             ),
             const SizedBox(height: 20),
             Padding(
