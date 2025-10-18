@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 import 'package:warga_kita_app/widget/logout_button.dart';
 import '../controller/display_activity_controller.dart';
 import '../controller/display_help_controler.dart';
@@ -68,13 +69,16 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             children: [
               Text(
-                "Hello, $userName",
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                "Selamat Datang, $userName",
+                style: WargaKitaTextStyles.bodyMedium.copyWith(
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
               ),
               const Spacer(),
               if (logoutButton != null) logoutButton,
               GestureDetector(
-                  onTap: _navigateToProfile,
+                onTap: _navigateToProfile,
                 child: const CircleAvatar(
                   backgroundImage: AssetImage("assets/images/profile1.jpeg"),
                   radius: 18,
@@ -85,25 +89,34 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           Text(
             "📅 $date",
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
+            style: WargaKitaTextStyles.bodySmall.copyWith(
+              color: Colors.white70,
+              fontSize: 15,
+            ),
           ),
           const SizedBox(height: 6),
-          const Text.rich(
+          Text.rich(
             TextSpan(
               text: "Explore Your\n ",
-              style: TextStyle(color: Colors.white, fontSize: 20),
+              style: WargaKitaTextStyles.headlineLarge.copyWith(
+                color: Colors.white,
+                fontSize: 24,
+              ),
               children: [
                 TextSpan(
                   text: "Community",
-                  style: TextStyle(
-                    color: Colors.orange,
+                  style: WargaKitaTextStyles.headlineLarge.copyWith(
+                    color: WargaKitaColors.secondary.color,
                     fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                    fontSize: 23,
                   ),
                 ),
                 TextSpan(
                   text: ", Today!",
-                  style: TextStyle(color: Colors.white, fontSize: 20),
+                  style: WargaKitaTextStyles.headlineLarge.copyWith(
+                    color: Colors.white,
+                    fontSize: 22,
+                  ),
                 ),
               ],
             ),
@@ -121,18 +134,26 @@ class _HomeScreenState extends State<HomeScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text("Error fetching activities: ${snapshot.error}"));
+          return Center(
+            child: Text("Error fetching activities: ${snapshot.error}"),
+          );
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text("Belum ada aktivitas komunitas.", style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(
+              "Belum ada aktivitas komunitas.",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           );
         }
 
         final activities = snapshot.data!;
-        const List<Color> bgColors = [Color(0xFF003366), Color(0xFFFE6B35), Colors.blueGrey];
-
+        const List<Color> bgColors = [
+          Color(0xFF003366),
+          Color(0xFFFE6B35),
+          Colors.blueGrey,
+        ];
 
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -176,21 +197,28 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: _helpController.helpRequestsStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: CircularProgressIndicator(),
-          ));
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
         }
         if (snapshot.hasError) {
-          return Center(child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text("Error fetching help requests: ${snapshot.error}"),
-          ));
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text("Error fetching help requests: ${snapshot.error}"),
+            ),
+          );
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text("Belum ada permintaan bantuan.", style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(
+              "Belum ada permintaan bantuan.",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           );
         }
 
@@ -209,17 +237,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   arguments: item.toMap(),
                 );
               },
-              child: HelpCard(
-                title: item.title,
-                subtitle: item.purpose,
-              ),
+              child: HelpCard(title: item.title, subtitle: item.purpose),
             );
           },
         );
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -253,22 +277,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         "Aktivitas Community",
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: WargaKitaTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: WargaKitaColors.black.color,
+                          fontSize: 18,
                         ),
                       ),
-                      // Text(
-                      //   "Lihat semua",
-                      //   style: theme.textTheme.bodySmall?.copyWith(
-                      //     color: theme.primaryColor,
-                      //   ),
-                      // ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
                     "Bantu Komunitas Mengorganisir Acara",
-                    style: theme.textTheme.bodySmall,
+                    style: WargaKitaTextStyles.bodySmall.copyWith(
+                      color: WargaKitaColors.black.color,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
@@ -280,30 +303,34 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Bantu Warga",
+                        style: WargaKitaTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: WargaKitaColors.black.color,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
                   Text(
-                    "Bantu Warga",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    "Bantu Pinjamkan Barang ke Warga yang Membutuhkan",
+                    style: WargaKitaTextStyles.bodySmall.copyWith(
+                      color: WargaKitaColors.black.color,
+                      fontSize: 14,
                     ),
                   ),
-                  // Text(
-                  //   "Lihat semua",
-                  //   style: theme.textTheme.bodySmall?.copyWith(
-                  //     color: theme.primaryColor,
-                  //   ),
-                  // ),
                 ],
               ),
+            ),
 
-            ),
-            const SizedBox(height: 6),
-            Text(
-              "Bantu Pinjamkan Barang ke Warga yang Membutuhkan",
-              style: theme.textTheme.bodySmall,
-            ),
             const SizedBox(height: 10),
 
             _buildHelpList(),

@@ -21,6 +21,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
+  bool _isPasswordVisible = false;
+  void _togglePasswordVisibility() {
+    setState(() {
+      _isPasswordVisible = !_isPasswordVisible;
+    });
+  }
+
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -198,6 +205,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       decoration: WargaKitaInputDecoration(
                         icon: Icons.person,
                         labelText: 'Nama',
+                        hintText: 'Nama Lengkap Anda',
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -216,13 +224,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       decoration: WargaKitaInputDecoration(
                         icon: Icons.email,
                         labelText: 'Email',
+                        hintText: '@gmail.com',
                       ),
                     ),
                     const SizedBox(height: 16),
 
                     TextFormField(
                       controller: _passwordController,
-                      obscureText: true,
+                      obscureText: !_isPasswordVisible,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return "Password wajib diisi";
@@ -233,7 +242,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                       decoration: WargaKitaInputDecoration(
                         icon: Icons.lock,
-                        labelText: 'Masukkan password',
+                        labelText: 'Masukkan Password',
+                        hintText: 'Minimal 6 Karakter',
+
+                        suffixIcon: _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        onSuffixIconTap: _togglePasswordVisibility,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -247,6 +262,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       decoration: WargaKitaInputDecoration(
                         icon: Icons.phone,
                         labelText: 'Nomor Telepon',
+                        hintText: '08xxxxxxxxx',
                       ),
                     ),
                     const SizedBox(height: 21),

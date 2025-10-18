@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
+import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 
 import '../service/user_service.dart';
 import '../widget/activity_confirmation_dialog.dart';
-
 
 class ActivityDetailScreen extends StatelessWidget {
   final Map<String, dynamic> kegiatan;
@@ -27,30 +28,25 @@ class ActivityDetailScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.info,
-            color: Color(0xFF6D4C41),
-            size: 24,
-          ),
+          const Icon(Icons.info, color: Color(0xFF6D4C41), size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Catatan",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black,
+                  style: WargaKitaTextStyles.bodyMedium.copyWith(
+                    color: WargaKitaColors.black.color,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   notes,
-                  style: const TextStyle(
+                  style: WargaKitaTextStyles.bodyMedium.copyWith(
+                    color: WargaKitaColors.black.color,
                     fontSize: 14,
-                    color: Colors.black87,
                   ),
                 ),
               ],
@@ -68,32 +64,37 @@ class ActivityDetailScreen extends StatelessWidget {
         final creatorName = snapshot.data ?? 'Memuat...';
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 20.0),
+          padding: const EdgeInsets.only(bottom: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Penyelenggara",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(Icons.person, color: Theme.of(context).primaryColor, size: 20),
-                  const SizedBox(width: 8),
+                  Text(
+                    "Penyelenggara:",
+                    style: WargaKitaTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: WargaKitaColors.secondary.color,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(
+                    Icons.person,
+                    color: Theme.of(context).primaryColor,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 6),
                   Text(
                     creatorName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
+                    style: WargaKitaTextStyles.bodyMedium.copyWith(
+                      color: WargaKitaColors.black.color,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 5),
+              const Divider(thickness: 2, height: 15, color: Color(0xFFEDEDED)),
             ],
           ),
         );
@@ -105,12 +106,19 @@ class ActivityDetailScreen extends StatelessWidget {
     final String creatorUid = kegiatan["creatorUid"] as String? ?? 'dummy_uid';
     final bool isCreator = creatorUid == _currentUid;
 
-    final int neededVolunteers = int.tryParse((kegiatan["neededVolunteers"] as dynamic)?.toString() ?? "0") ?? 0;
+    final int neededVolunteers =
+        int.tryParse(
+          (kegiatan["neededVolunteers"] as dynamic)?.toString() ?? "0",
+        ) ??
+        0;
 
     final int currentVolunteers = (kegiatan["currentVolunteers"] as int?) ?? 0;
 
-    final List<String> participantsUids = (kegiatan["participantsUids"] as List<dynamic>?)
-        ?.map((e) => e.toString()).toList() ?? [];
+    final List<String> participantsUids =
+        (kegiatan["participantsUids"] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        [];
 
     final bool hasJoined = participantsUids.contains(_currentUid);
     final bool isFull = currentVolunteers >= neededVolunteers;
@@ -121,7 +129,9 @@ class ActivityDetailScreen extends StatelessWidget {
       if (isCreator) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Anda adalah pembuat kegiatan. Anda tidak bisa bergabung."),
+            content: Text(
+              "Anda adalah pembuat kegiatan. Anda tidak bisa bergabung.",
+            ),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
           ),
@@ -155,8 +165,6 @@ class ActivityDetailScreen extends StatelessWidget {
         ? "Sudah Bergabung"
         : "Join Kegiatan";
 
-    final Color bgColor = kegiatan["bgColor"] as Color? ?? const Color(0xFF003E6A);
-
     return Column(
       children: [
         Padding(
@@ -183,29 +191,35 @@ class ActivityDetailScreen extends StatelessWidget {
                       : const Color(0xFFFE6B35),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: const BorderSide(
-                        color: Color(0xFFEDEDED), width: 2),
+                    side: const BorderSide(color: Color(0xFFEDEDED), width: 2),
                   ),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 12),
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
                 child: Text(
                   buttonText,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),              Row(
+              ),
+              Row(
                 children: [
-                  const Icon(Icons.person_2_outlined,
-                      color: Colors.white, size: 30),
+                  const Icon(
+                    Icons.person_2_outlined,
+                    color: Colors.white,
+                    size: 30,
+                  ),
                   const SizedBox(width: 6),
-                  Text("$currentVolunteers/$neededVolunteers",
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 16)),
+                  Text(
+                    "$currentVolunteers/$neededVolunteers",
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -256,9 +270,9 @@ class ActivityDetailScreen extends StatelessWidget {
                 Expanded(
                   flex: 3,
                   child: _buildDetailInfo(
-                    icon: Icons.location_on,
-                    text: kegiatan["location"] as String? ?? 'Lokasi tidak tersedia',
-                    iconColor: const Color(0xFFFE6B35),
+                    icon: Icons.calendar_today,
+                    text: kegiatan["date"] as String? ?? '-',
+                    iconColor: WargaKitaColors.secondary.color,
                   ),
                 ),
                 Expanded(
@@ -266,42 +280,73 @@ class ActivityDetailScreen extends StatelessWidget {
                   child: _buildDetailInfo(
                     icon: Icons.access_time,
                     text: kegiatan["time"] as String? ?? 'Belum ada waktu',
-                    iconColor: const Color(0xFFFE6B35),
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: _buildDetailInfo(
-                    icon: Icons.calendar_today,
-                    text: kegiatan["date"] as String? ?? '-',
-                    iconColor: const Color(0xFFFE6B35),
+                    iconColor: WargaKitaColors.secondary.color,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+
+            _buildDetailInfo(
+              icon: Icons.location_on,
+              text: kegiatan["location"] as String? ?? 'Lokasi tidak tersedia',
+              iconColor: WargaKitaColors.secondary.color,
+            ),
+            const SizedBox(height: 15),
 
             _buildCreatorInfo(context, creatorUid),
 
-            const Text("Deskripsi",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              "Deskripsi Kegiatan",
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: WargaKitaColors.black.color,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(kegiatan["description"] as String? ?? 'Deskripsi tidak tersedia.'),
+            Text(
+              kegiatan["description"] as String? ?? 'Deskripsi tidak tersedia.',
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                color: WargaKitaColors.black.color,
+              ),
+            ),
+            const SizedBox(height: 5),
+            const Divider(thickness: 2, height: 15, color: Color(0xFFEDEDED)),
 
-            const SizedBox(height: 20),
-            const Text("Kebutuhan Bantuan",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 10),
+            Text(
+              "Kebutuhan Bantuan",
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: WargaKitaColors.black.color,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(kegiatan["requiredAid"] as String? ?? 'Kebutuhan bantuan tidak dicantumkan.'),
-
-            const SizedBox(height: 20),
-            const Text("Tujuan Kegiatan",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              kegiatan["requiredAid"] as String? ??
+                  'Kebutuhan bantuan tidak dicantumkan.',
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                color: WargaKitaColors.black.color,
+              ),
+            ),
+            const SizedBox(height: 5),
+            const Divider(thickness: 2, height: 15, color: Color(0xFFEDEDED)),
+            const SizedBox(height: 10),
+            Text(
+              "Tujuan Kegiatan",
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: WargaKitaColors.black.color,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(kegiatan["goal"] as String? ?? 'Tujuan kegiatan tidak dicantumkan.'),
+            Text(
+              kegiatan["goal"] as String? ??
+                  'Tujuan kegiatan tidak dicantumkan.',
+              style: WargaKitaTextStyles.bodyMedium.copyWith(
+                color: WargaKitaColors.black.color,
+              ),
+            ),
 
             const SizedBox(height: 20),
             _buildNotesInfoBox(kegiatan["notes"] as String? ?? ''),
@@ -311,34 +356,41 @@ class ActivityDetailScreen extends StatelessWidget {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = kegiatan["bgColor"] as Color? ?? const Color(0xFF003E6A);
+    final Color bgColor =
+        kegiatan["bgColor"] as Color? ?? const Color(0xFF003E6A);
 
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const BackButton(color: Colors.white),
-        title: const Text("Detail Kegiatan",
-            style: TextStyle(color: Colors.white)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmark_border, color: Colors.white),
-            onPressed: () {},
-          )
-        ],
+        leading: Padding(
+          padding: EdgeInsets.only(left: 16),
+          child: InkWell(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              child: const Icon(Icons.chevron_left, size: 35),
+            ),
+          ),
+        ),
+        title: const Text(
+          "Detail Kegiatan",
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(context),
-            Expanded(
-              child: _buildContent(context),
-            ),
+            Expanded(child: _buildContent(context)),
           ],
         ),
       ),
