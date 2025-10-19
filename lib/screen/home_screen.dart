@@ -165,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     Navigator.pushNamed(
                       context,
-                      '/detail-kegiatan',
+                      '/detail-acara',
                       arguments: activity.toMap()..['bgColor'] = bgColor,
                     );
                   },
@@ -271,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Aktivitas Community",
+                        "Acara Komunitas",
                         style: WargaKitaTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.bold,
                           color: WargaKitaColors.black.color,
@@ -305,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Bantu Warga",
+                        "Peminjaman Barang",
                         style: WargaKitaTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.bold,
                           color: WargaKitaColors.black.color,

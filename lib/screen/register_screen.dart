@@ -78,7 +78,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: () {
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       '/login',
-                      (Route<dynamic> route) => false,
+                          (Route<dynamic> route) => false,
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -127,12 +127,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
               .collection('users')
               .doc(user.uid)
               .set({
-                'uid': user.uid,
-                'username': _nameController.text,
-                'email': _emailController.text,
-                'phone_number': _phoneController.text,
-                'created_at': FieldValue.serverTimestamp(),
-              });
+            'uid': user.uid,
+            'username': _nameController.text,
+            'email': _emailController.text,
+            'phone_number': _phoneController.text,
+            'created_at': FieldValue.serverTimestamp(),
+
+            'created_activities_count': 0,
+            'joined_activities_count': 0,
+            'created_help_requests_count': 0,
+            'helped_requests_count': 0,
+          });
 
           _showSuccessDialog();
         }
@@ -191,7 +196,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Register untuk akses Community!',
+                      'Register untuk akses Komunitas!',
                       style: WargaKitaTextStyles.bodyMedium,
                     ),
 

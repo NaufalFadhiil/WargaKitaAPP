@@ -11,7 +11,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Timer 3 detik
     Future.delayed(const Duration(seconds: 3), () {
       Navigator.pushReplacementNamed(context, '/start');
     });
@@ -27,7 +26,6 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Image.asset("assets/images/texture.png", fit: BoxFit.cover),
           ),
 
-          // Background gradient separuh layar (dari tengah ke bawah)
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(

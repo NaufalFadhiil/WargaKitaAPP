@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:warga_kita_app/service/delete_help_service.dart';
 import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 import '../widget/help_confirmation_dialog.dart';
 import '../service/user_service.dart';
+import '../widget/delete_confirmation_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HelpDetailScreen extends StatefulWidget {
@@ -16,6 +18,7 @@ class HelpDetailScreen extends StatefulWidget {
 
 class _HelpDetailScreenState extends State<HelpDetailScreen> {
   final UserService _userService = UserService();
+  final DeleteHelpService _deleteService = DeleteHelpService();
   final String _currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
   String _creatorPhoneNumber = '';
   late List<String> _helpersUids;
@@ -86,17 +89,22 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
   Widget _buildHeader(BuildContext context) {
     final String creatorUid =
         widget.helpItem["creatorUid"] as String? ?? 'dummy_uid';
+    final String helpId = widget.helpItem["id"] as String? ?? '';
     final bool isCreator = creatorUid == _currentUid;
     final bool hasHelped = _helpersUids.contains(_currentUid);
 
     void onBantuPressed() {
       if (isCreator) {
+        showDeleteConfirmationDialog(
+          context,
+          widget.helpItem["title"] as String? ?? 'Permintaan Peminjaman',
+              () => _deleteService.deleteHelpRequest(helpId),
+        );
+      } else if (hasHelped) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              "Anda adalah peminjam. Anda tidak bisa membantu diri sendiri.",
-            ),
-            backgroundColor: Colors.red,
+            content: Text("Anda sudah menawarkan bantuan."),
+            backgroundColor: Colors.blue,
             duration: Duration(seconds: 2),
           ),
         );
@@ -119,17 +127,17 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
       }
     }
 
-    String buttonText = "Bantu";
+    String buttonText = "Bantu Peminjaman";
     Color buttonColor = const Color(0xFFFE6B35);
     bool isDisabled = false;
 
     if (isCreator) {
-      buttonText = "Anda Adalah Peminjam";
-      buttonColor = Colors.white;
-      isDisabled = true;
+      buttonText = "Hapus Peminjaman";
+      buttonColor = WargaKitaColors.secondary.color;
+      isDisabled = false;
     } else if (hasHelped) {
       buttonText = "Sudah Menawarkan Bantuan";
-      buttonColor = Colors.white;
+      buttonColor = Colors.grey;
       isDisabled = true;
     }
 
@@ -145,7 +153,7 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
           ),
           child: Center(
             child: Text(
-              widget.helpItem["title"] as String? ?? 'Detail Bantuan',
+              widget.helpItem["title"] as String? ?? 'Detail Peminjaman',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
@@ -157,22 +165,24 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: ElevatedButton(
-            onPressed: isDisabled ? null : onBantuPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: buttonColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: Color(0xFFEDEDED), width: 2),
+          child: SizedBox(
+            child: ElevatedButton(
+              onPressed: isDisabled && !isCreator ? null : onBantuPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: buttonColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Color(0xFFEDEDED), width: 2),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-            child: Text(
-              buttonText,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
+              child: Text(
+                buttonText,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -200,7 +210,7 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Titik Bertemu/Lokasi Kegiatan",
+              "Titik Bertemu",
               style: WargaKitaTextStyles.bodyMedium.copyWith(
                 fontWeight: FontWeight.bold,
                 color: WargaKitaColors.black.color,
@@ -300,7 +310,7 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
           ),
         ),
         title: Text(
-          "Detail Bantu",
+          "Detail Peminjaman",
           style: WargaKitaTextStyles.headlineLarge.copyWith(
             fontSize: 20,
             color: WargaKitaColors.white.color,

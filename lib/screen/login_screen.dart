@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
           email: _emailController.text,
           password: _passwordController.text,
         );
-        _showSuccessSnackbar("Login Berhasil! Selamat datang di Community.");
+        _showSuccessSnackbar("Login Berhasil! Selamat datang di Komunitas.");
 
         await Future.delayed(const Duration(milliseconds: 500));
 
@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Login untuk akses Community!',
+                    'Login untuk akses Komunitas!',
                     style: WargaKitaTextStyles.bodyMedium,
                   ),
 

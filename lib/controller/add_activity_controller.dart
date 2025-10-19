@@ -114,7 +114,7 @@ class AddActivityController {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Kegiatan berhasil ditambahkan!', style: TextStyle(color: WargaKitaColors.white.color)),
+              content: Text('Acara berhasil ditambahkan!', style: TextStyle(color: WargaKitaColors.white.color)),
               backgroundColor: WargaKitaColors.primary.color,
               duration: const Duration(seconds: 2),
             ),
@@ -124,7 +124,7 @@ class AddActivityController {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Gagal menambahkan kegiatan: $e')),
+            SnackBar(content: Text('Gagal menambahkan acara: $e')),
           );
         }
         return false;

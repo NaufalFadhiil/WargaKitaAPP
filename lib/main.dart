@@ -38,11 +38,11 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
         '/profile': (context) => const ProfileScreen(),
-        '/detail-kegiatan': (context) {
+        '/detail-acara': (context) {
           final args =
               ModalRoute.of(context)!.settings.arguments
                   as Map<String, dynamic>;
-          return ActivityDetailScreen(kegiatan: args);
+          return ActivityDetailScreen(acara: args);
         },
         '/add-activity': (context) => const AddActivityScreen(),
         '/add-help': (context) => const AddHelpScreen(),

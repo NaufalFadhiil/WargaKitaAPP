@@ -5,10 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> _recordHelper(BuildContext context, String helpId, String helperUid) async {
-  if (helpId.isEmpty) return;
+  if (helpId.isEmpty || helperUid.isEmpty) return;
 
   try {
     final helpRef = FirebaseFirestore.instance.collection('help_requests').doc(helpId);
+    final userRef = FirebaseFirestore.instance.collection('users').doc(helperUid);
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final docSnapshot = await transaction.get(helpRef);
@@ -29,6 +30,10 @@ Future<void> _recordHelper(BuildContext context, String helpId, String helperUid
       transaction.update(helpRef, {
         'helpersUids': FieldValue.arrayUnion([helperUid]),
       });
+
+      transaction.set(userRef, {
+        'helped_requests_count': FieldValue.increment(1),
+      }, SetOptions(merge: true));
     });
 
   } catch (e) {

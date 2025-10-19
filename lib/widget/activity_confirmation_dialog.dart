@@ -9,7 +9,7 @@ void _launchWhatsApp(BuildContext context, String whatsappLink) async {
   if (whatsappLink.isEmpty) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Link WhatsApp tidak tersedia untuk kegiatan ini."), backgroundColor: Colors.orange),
+        const SnackBar(content: Text("Link WhatsApp tidak tersedia untuk acara ini."), backgroundColor: Colors.orange),
       );
     }
     return;
@@ -33,7 +33,7 @@ Future<void> _increaseVolunteerCount(BuildContext context, String activityId, St
   if (activityId.isEmpty || currentUid == null) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Gagal mendapatkan ID pengguna/kegiatan. Gagal bergabung."), backgroundColor: Colors.red),
+        const SnackBar(content: Text("Gagal mendapatkan ID pengguna/acara. Gagal bergabung."), backgroundColor: Colors.red),
       );
     }
     return;
@@ -41,12 +41,13 @@ Future<void> _increaseVolunteerCount(BuildContext context, String activityId, St
 
   try {
     final activityRef = FirebaseFirestore.instance.collection('activities').doc(activityId);
+    final userRef = FirebaseFirestore.instance.collection('users').doc(currentUid);
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final docSnapshot = await transaction.get(activityRef);
 
       if (!docSnapshot.exists) {
-        throw Exception("Kegiatan tidak ditemukan.");
+        throw Exception("Acara tidak ditemukan.");
       }
 
       final data = docSnapshot.data();
@@ -61,13 +62,17 @@ Future<void> _increaseVolunteerCount(BuildContext context, String activityId, St
       }
 
       if (participants.contains(currentUid)) {
-        throw Exception("Anda sudah terdaftar di kegiatan ini!");
+        throw Exception("Anda sudah terdaftar di acara ini!");
       }
 
       transaction.update(activityRef, {
         'currentVolunteers': FieldValue.increment(1),
         'participantsUids': FieldValue.arrayUnion([currentUid]),
       });
+
+      transaction.set(userRef, {
+        'joined_activities_count': FieldValue.increment(1),
+      }, SetOptions(merge: true));
     });
 
     if (context.mounted) {
@@ -85,7 +90,7 @@ Future<void> _increaseVolunteerCount(BuildContext context, String activityId, St
     if (e.toString().contains("relawan sudah penuh")) {
       errorMessage = "Relawan sudah penuh!";
     } else if (e.toString().contains("sudah terdaftar")) {
-      errorMessage = "Anda sudah terdaftar di kegiatan ini!";
+      errorMessage = "Anda sudah terdaftar di acara ini!";
     } else {
       print('Error updating volunteer count: $e');
       errorMessage = 'Gagal bergabung: Terjadi error saat update data.';
@@ -102,7 +107,7 @@ Future<void> _increaseVolunteerCount(BuildContext context, String activityId, St
 
 void showActivityConfirmDialog(BuildContext context, Map<String, dynamic> activity) {
   final String creatorUid = activity["creatorUid"] as String? ?? 'dummy_uid';
-  final String title = activity["title"] as String? ?? 'Detail Kegiatan';
+  final String title = activity["title"] as String? ?? 'Detail Acara';
   final String location = activity["location"] as String? ?? 'Lokasi tidak tersedia';
   final String time = activity["time"] as String? ?? 'Waktu tidak tersedia';
   final String date = activity["date"] as String? ?? 'Tanggal tidak tersedia';
@@ -132,7 +137,7 @@ void showActivityConfirmDialog(BuildContext context, Map<String, dynamic> activi
                   ),
                   const SizedBox(width: 10),
                   const Text(
-                    'Konfirmasi',
+                    'Konfirmasi Bantuan',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -154,7 +159,7 @@ void showActivityConfirmDialog(BuildContext context, Map<String, dynamic> activi
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Detail Kegiatan", style: TextStyle(
+                        const Text("Detail Acara", style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF003E6A))),
                         const SizedBox(height: 15),
 

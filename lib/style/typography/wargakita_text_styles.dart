@@ -7,21 +7,18 @@ class WargaKitaTextStyles {
     color: Colors.black,
   );
 
-  // Judul besar (Splash, Onboarding, Home)
   static TextStyle headlineLarge = _commonStyle.copyWith(
     fontSize: 30,
     fontWeight: FontWeight.bold,
     color: WargaKitaColors.primary.color,
   );
 
-  // Subjudul (Onboarding subtitle, Deskripsi kegiatan, dll.)
   static TextStyle bodyMedium = _commonStyle.copyWith(
     fontSize: 16,
     fontWeight: FontWeight.normal,
     color: Colors.black,
   );
 
-  // Teks kecil (label, info, dsb.)
   static TextStyle bodySmall = _commonStyle.copyWith(
     fontSize: 12,
     fontWeight: FontWeight.normal,

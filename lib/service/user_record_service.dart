@@ -5,63 +5,33 @@ class UserActivityService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-  Future<int> getCreatedActivitiesCount() async {
+  Future<int> _getCounter(String field) async {
     if (_currentUid.isEmpty) return 0;
     try {
-      final snapshot = await _firestore
-          .collection('activities')
-          .where('creatorUid', isEqualTo: _currentUid)
-          .count()
-          .get();
-      return snapshot.count ?? 0;
+      final snapshot = await _firestore.collection('users').doc(_currentUid).get();
+      if (snapshot.exists) {
+        return snapshot.data()?[field] as int? ?? 0;
+      }
+      return 0;
     } catch (e) {
-      print('Error getting created activities count: $e');
+      print('Error getting activity counter for $field: $e');
       return 0;
     }
+  }
+
+  Future<int> getCreatedActivitiesCount() async {
+    return _getCounter('created_activities_count');
   }
 
   Future<int> getJoinedActivitiesCount() async {
-    if (_currentUid.isEmpty) return 0;
-    try {
-      final snapshot = await _firestore
-          .collection('activities')
-          .where('participantsUids', arrayContains: _currentUid)
-          .count()
-          .get();
-      return snapshot.count ?? 0;
-    } catch (e) {
-      print('Error getting joined activities count: $e');
-      return 0;
-    }
+    return _getCounter('joined_activities_count');
   }
 
   Future<int> getCreatedHelpRequestsCount() async {
-    if (_currentUid.isEmpty) return 0;
-    try {
-      final snapshot = await _firestore
-          .collection('help_requests')
-          .where('creatorUid', isEqualTo: _currentUid)
-          .count()
-          .get();
-      return snapshot.count ?? 0;
-    } catch (e) {
-      print('Error getting created help requests count: $e');
-      return 0;
-    }
+    return _getCounter('created_help_requests_count');
   }
 
   Future<int> getHelpedRequestsCount() async {
-    if (_currentUid.isEmpty) return 0;
-    try {
-      final snapshot = await _firestore
-          .collection('help_requests')
-          .where('helpersUids', arrayContains: _currentUid)
-          .count()
-          .get();
-      return snapshot.count ?? 0;
-    } catch (e) {
-      print('Error getting helped requests count: $e');
-      return 0;
-    }
+    return _getCounter('helped_requests_count');
   }
 }

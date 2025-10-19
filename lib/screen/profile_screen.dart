@@ -180,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Text(
-                    "Account",
+                    "Identitas",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18,
@@ -262,22 +262,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         children: [
                           _RecordCard(
-                            title: "Bikin Acara",
+                            title: "Buat Acara",
                             count: data['created_activity']?.toString() ?? '0',
                             gradientColors: const [Color(0xFF2E4A6F), Color(0xFF6A5ACD)],
-                            icon: Icons.event,
+                            icon: Icons.group_add_outlined,
                           ),
                           _RecordCard(
-                            title: "Ikut Bantu Acara",
+                            title: "Bantu Acara",
                             count: data['joined_activity']?.toString() ?? '0',
                             gradientColors: const [Color(0xFFFF7043), Color(0xFFFFA726)],
-                            icon: Icons.volunteer_activism,
+                            icon: Icons.group_outlined,
                           ),
                           _RecordCard(
-                            title: "Bikin Pinjaman",
+                            title: "Buat Pinjaman",
                             count: data['created_help']?.toString() ?? '0',
                             gradientColors: const [Color(0xFF2E4A6F), Color(0xFF6A5ACD)],
-                            icon: Icons.handshake,
+                            icon: Icons.waving_hand_outlined,
                           ),
                           _RecordCard(
                             title: "Bantu Pinjaman",

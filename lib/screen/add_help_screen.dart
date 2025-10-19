@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+  import 'package:flutter/material.dart';
 import '../style/colors/wargakita_colors.dart';
 import '../controller/add_help_controller.dart';
 
@@ -152,7 +152,7 @@ class _AddHelpScreenState extends State<AddHelpScreen> {
               ),
               FormInputField(
                 controller: _controller.locationController,
-                title: "Titik Bertemu/Lokasi Kegiatan",
+                title: "Titik Bertemu/Lokasi Acara",
                 hintText: "Contoh: Rumah Pak RT 01",
                 validator: (value) =>
                     _controller.validateRequired(value, 'Titik bertemu'),

@@ -131,7 +131,7 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Tambah Kegiatan"),
+        title: const Text("Tambah Acara"),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.chevron_left, size: 35),
@@ -146,10 +146,10 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
             children: [
               FormInputField(
                 controller: _controller.titleController,
-                title: "Judul Kegiatan",
+                title: "Judul Acara",
                 hintText: "Contoh: Perayaan 17 Agustus Desa Sukamaju",
                 validator: (value) =>
-                    _controller.validateRequired(value, 'Judul kegiatan'),
+                    _controller.validateRequired(value, 'Judul acara'),
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,11 +183,11 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                   Expanded(
                     child: FormInputField(
                       controller: _controller.locationController,
-                      title: "Lokasi Kegiatan",
+                      title: "Lokasi Acara",
                       hintText: "Contoh: Rumah Pak RT 01",
                       validator: (value) => _controller.validateRequired(
                         value,
-                        'Lokasi kegiatan',
+                        'Lokasi acara',
                       ),
                     ),
                   ),
@@ -204,11 +204,11 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
               ),
               FormInputField(
                 controller: _controller.descriptionController,
-                title: "Deskripsi Kegiatan",
-                hintText: "Jelaskan kegiatan yang ingin anda buat",
+                title: "Deskripsi Acara",
+                hintText: "Jelaskan acara yang ingin anda buat",
                 isLarge: true,
                 validator: (value) =>
-                    _controller.validateRequired(value, 'Deskripsi kegiatan'),
+                    _controller.validateRequired(value, 'Deskripsi acara'),
               ),
               FormInputField(
                 controller: _controller.aidController,
@@ -220,11 +220,11 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
               ),
               FormInputField(
                 controller: _controller.goalController,
-                title: "Tujuan Kegiatan",
+                title: "Tujuan Acara",
                 hintText: "Contoh: Mempererat tali silaturahmi antar warga",
                 isLarge: true,
                 validator: (value) =>
-                    _controller.validateRequired(value, 'Tujuan kegiatan'),
+                    _controller.validateRequired(value, 'Tujuan acara'),
               ),
               FormInputField(
                 controller: _controller.whatsappController,
@@ -236,7 +236,7 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
               FormInputField(
                 controller: _controller.notesController,
                 title: "Catatan",
-                hintText: "Isi dengan informasi tambahan untuk kegiatan anda",
+                hintText: "Isi dengan informasi tambahan untuk acara anda",
                 isLarge: true,
                 isOptional: true,
               ),
