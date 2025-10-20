@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:warga_kita_app/service/user_record_service.dart';
+import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
 import '../service/user_service.dart';
 import '../widget/logout_button.dart';
 
@@ -124,34 +125,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             border: Border.all(color: Colors.white, width: 5),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
+                                color: WargaKitaColors.black.color.withValues(alpha: 0.15),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                           ),
                           child: const CircleAvatar(
-                            radius: 55,
-                            backgroundImage: AssetImage('assets/images/profile1.jpeg'),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 4,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2E4A6F),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                            ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.camera_alt,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              onPressed: () {},
-                            ),
+                            radius: 60,
+                            backgroundImage: AssetImage("assets/images/profile1.jpeg"),
                           ),
                         ),
                       ],
@@ -170,7 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
                   ),
@@ -234,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
+                        color: Colors.grey.withValues(alpha: .3),
                         blurRadius: 6,
                         offset: const Offset(0, 3),
                       ),
@@ -302,7 +284,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
                   ),

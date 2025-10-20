@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:warga_kita_app/service/delete_help_service.dart';
 import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
@@ -6,6 +7,7 @@ import '../widget/help_confirmation_dialog.dart';
 import '../service/user_service.dart';
 import '../widget/delete_confirmation_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../data/help_model.dart';
 
 class HelpDetailScreen extends StatefulWidget {
   final Map<String, dynamic> helpItem;
@@ -20,16 +22,37 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
   final UserService _userService = UserService();
   final DeleteHelpService _deleteService = DeleteHelpService();
   final String _currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  late Future<Map<String, dynamic>> _helpDataFuture;
   String _creatorPhoneNumber = '';
-  late List<String> _helpersUids;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _helpersUids = (widget.helpItem["helpersUids"] as List<dynamic>?)
-        ?.map((e) => e.toString())
-        .toList() ??
-        [];
+    _helpDataFuture = _fetchHelpData(widget.helpItem["id"] as String? ?? '');
+  }
+
+  Future<Map<String, dynamic>> _fetchHelpData(String helpId) async {
+    if (helpId.isEmpty) return widget.helpItem;
+
+    try {
+      final docSnapshot = await _firestore.collection('help_requests').doc(helpId).get();
+      if (docSnapshot.exists) {
+        final helpModel = HelpData.fromFirestore(docSnapshot);
+        return helpModel.toMap();
+      }
+      return widget.helpItem;
+    } catch (e) {
+      return widget.helpItem;
+    }
+  }
+
+  void _refreshData() {
+    setState(() {
+      _helpDataFuture = _fetchHelpData(widget.helpItem["id"] as String? ?? '');
+    });
   }
 
   Widget _buildCreatorInfo(BuildContext context, String uid) {
@@ -48,6 +71,10 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
               });
             });
           }
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator(color: WargaKitaColors.primary.color));
         }
 
         return Padding(
@@ -86,21 +113,29 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    final String creatorUid =
-        widget.helpItem["creatorUid"] as String? ?? 'dummy_uid';
-    final String helpId = widget.helpItem["id"] as String? ?? '';
+  Widget _buildHeader(BuildContext context, Map<String, dynamic> data) {
+    final String creatorUid = data["creatorUid"] as String? ?? 'dummy_uid';
+    final String helpId = data["id"] as String? ?? '';
     final bool isCreator = creatorUid == _currentUid;
-    final bool hasHelped = _helpersUids.contains(_currentUid);
 
-    void onBantuPressed() {
+    final List<String> helpersUids = (data["helpersUids"] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .toList() ?? [];
+
+    final bool hasHelped = helpersUids.contains(_currentUid);
+
+    void onBantuPressed() async {
       if (isCreator) {
         showDeleteConfirmationDialog(
           context,
-          widget.helpItem["title"] as String? ?? 'Permintaan Peminjaman',
-              () => _deleteService.deleteHelpRequest(helpId),
+          data["title"] as String? ?? 'Permintaan Peminjaman',
+              () => _deleteService.deleteHelpRequest(helpId).then((_) {
+            if (!context.mounted) return;
+            Navigator.pop(context);
+          }),
         );
       } else if (hasHelped) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Anda sudah menawarkan bantuan."),
@@ -109,6 +144,7 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
           ),
         );
       } else if (_creatorPhoneNumber.isEmpty) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -119,17 +155,24 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
           ),
         );
       } else {
-        final Map<String, dynamic> helpItemWithPhone = Map.from(
-          widget.helpItem,
-        );
+        setState(() => _isLoading = true);
+        final Map<String, dynamic> helpItemWithPhone = Map.from(data);
         helpItemWithPhone['phoneNumber'] = _creatorPhoneNumber;
-        showHelpConfirmDialog(context, helpItemWithPhone);
+        final bool confirmed = await showHelpConfirmDialog(context, helpItemWithPhone);
+
+        if (!mounted) return;
+
+        if (confirmed == true) {
+          _refreshData();
+        }
+
+        setState(() => _isLoading = false);
       }
     }
 
     String buttonText = "Bantu Peminjaman";
     Color buttonColor = const Color(0xFFFE6B35);
-    bool isDisabled = false;
+    bool isDisabled = _isLoading || (!isCreator && hasHelped);
 
     if (isCreator) {
       buttonText = "Hapus Peminjaman";
@@ -138,7 +181,6 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
     } else if (hasHelped) {
       buttonText = "Sudah Menawarkan Bantuan";
       buttonColor = Colors.grey;
-      isDisabled = true;
     }
 
     return Column(
@@ -153,7 +195,7 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
           ),
           child: Center(
             child: Text(
-              widget.helpItem["title"] as String? ?? 'Detail Peminjaman',
+              data["title"] as String? ?? 'Detail Peminjaman',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
@@ -192,11 +234,9 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    final String creatorUid =
-        widget.helpItem["creatorUid"] as String? ?? 'dummy_uid';
-    final String location =
-        widget.helpItem["location"] as String? ?? 'Lokasi tidak tersedia';
+  Widget _buildContent(BuildContext context, Map<String, dynamic> data) {
+    final String creatorUid = data["creatorUid"] as String? ?? 'dummy_uid';
+    final String location = data["location"] as String? ?? 'Lokasi tidak tersedia';
 
     return Container(
       width: double.infinity,
@@ -251,7 +291,7 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              widget.helpItem["needs"] as String? ??
+              data["needs"] as String? ??
                   'Keperluan tidak dicantumkan.',
               style: WargaKitaTextStyles.bodyMedium.copyWith(
                 color: WargaKitaColors.black.color,
@@ -270,7 +310,7 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              widget.helpItem["description"] as String? ??
+              data["description"] as String? ??
                   'Deskripsi barang tidak tersedia.',
               style: WargaKitaTextStyles.bodyMedium.copyWith(
                 color: WargaKitaColors.black.color,
@@ -319,12 +359,29 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            Expanded(child: _buildContent(context)),
-          ],
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: _helpDataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                color: WargaKitaColors.white.color,
+                child: Center(child: CircularProgressIndicator(color: WargaKitaColors.primary.color)),
+              );
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return Center(child: Text("Gagal memuat detail peminjaman.", style: TextStyle(color: WargaKitaColors.primary.color)));
+            }
+
+            final data = snapshot.data!;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context, data),
+                Expanded(child: _buildContent(context, data)),
+              ],
+            );
+          },
         ),
       ),
     );

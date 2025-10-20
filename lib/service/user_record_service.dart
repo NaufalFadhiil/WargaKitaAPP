@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class UserActivityService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,7 +15,7 @@ class UserActivityService {
       }
       return 0;
     } catch (e) {
-      print('Error getting activity counter for $field: $e');
+      debugPrint('Error getting activity counter for $field: $e');
       return 0;
     }
   }

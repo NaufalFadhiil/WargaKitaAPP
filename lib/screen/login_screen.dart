@@ -49,9 +49,14 @@ class _LoginScreenState extends State<LoginScreen> {
           email: _emailController.text,
           password: _passwordController.text,
         );
+
+        if (!mounted) return;
+
         _showSuccessSnackbar("Login Berhasil! Selamat datang di Komunitas.");
 
         await Future.delayed(const Duration(milliseconds: 500));
+
+        if (!mounted) return;
 
         Navigator.of(context).pushReplacementNamed('/home');
       } on FirebaseAuthException catch (e) {
@@ -188,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.pushNamed(context, '/register');
                         },
                         child: Text(
-                          'Daftar Sekarang',
+                          'Register Sekarang',
                           style: WargaKitaTextStyles.bodyMedium.copyWith(
                             color: WargaKitaColors.primary.color,
                             fontWeight: FontWeight.bold,

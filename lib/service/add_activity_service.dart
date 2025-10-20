@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../data/activity_model.dart';
 
 class AddActivityService {
@@ -23,9 +24,9 @@ class AddActivityService {
 
     try {
       await batch.commit();
-      print('Aktivitas berhasil ditambahkan ke Firestore dan counter diupdate!');
+      debugPrint('Aktivitas berhasil ditambahkan ke Firestore dan counter diupdate!');
     } catch (e) {
-      print('Error saat menambahkan aktivitas: $e');
+      debugPrint('Error saat menambahkan aktivitas: $e');
       rethrow;
     }
   }

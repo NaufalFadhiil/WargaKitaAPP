@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class DeleteHelpService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -9,9 +10,9 @@ class DeleteHelpService {
     }
     try {
       await _firestore.collection('help_requests').doc(helpId).delete();
-      print('Permintaan bantuan $helpId berhasil dihapus dari Firestore.');
+      debugPrint('Permintaan bantuan $helpId berhasil dihapus dari Firestore.');
     } catch (e) {
-      print('Error saat menghapus permintaan bantuan: $e');
+      debugPrint('Error saat menghapus permintaan bantuan: $e');
       rethrow;
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,6 +13,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/start');
     });
   }
@@ -34,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 stops: const [0.0, 0.5, 1.0],
                 colors: [
                   Colors.transparent,
-                  Colors.white.withOpacity(0.9),
+                  WargaKitaColors.white.color.withValues(alpha: 0.9),
                   const Color(0xFFF8F8F8),
                 ],
               ),

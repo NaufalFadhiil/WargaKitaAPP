@@ -40,16 +40,16 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
         '/detail-acara': (context) {
           final args =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>;
+          ModalRoute.of(context)!.settings.arguments
+          as Map<String, dynamic>;
           return ActivityDetailScreen(acara: args);
         },
         '/add-activity': (context) => const AddActivityScreen(),
         '/add-help': (context) => const AddHelpScreen(),
         '/help-detail': (context) {
           final args =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>;
+          ModalRoute.of(context)!.settings.arguments
+          as Map<String, dynamic>;
           return HelpDetailScreen(helpItem: args);
         },
       },

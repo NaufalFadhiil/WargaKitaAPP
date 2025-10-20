@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   User? _currentUser;
   String _currentDate = '';
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -128,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: _activityController.activitiesStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator(color: WargaKitaColors.primary.color));
         }
         if (snapshot.hasError) {
           return Center(
@@ -162,12 +163,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 final bgColor = bgColors[index % bgColors.length];
 
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(
+                  onTap: () async {
+                    setState(() => _isLoading = true);
+                    await Navigator.pushNamed(
                       context,
                       '/detail-acara',
                       arguments: activity.toMap()..['bgColor'] = bgColor,
                     );
+                    setState(() => _isLoading = false);
                   },
                   child: ActivityCard(
                     title: activity.title,
@@ -180,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     bgColor: bgColor,
                   ),
                 );
-              }).toList(),
+              }),
               const SizedBox(width: 16),
             ],
           ),
@@ -194,10 +197,10 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: _helpController.helpRequestsStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
+          return Center(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: CircularProgressIndicator(),
+              padding: const EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(color: WargaKitaColors.primary.color),
             ),
           );
         }
@@ -207,37 +210,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Text("Error fetching help requests: ${snapshot.error}"),
               ));
-              }
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                "Belum ada permintaan bantuan.",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            );
-          }
-
-          final helpItems = snapshot.data!;
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: helpItems.length,
-            itemBuilder: (context, index) {
-              final item = helpItems[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/help-detail',
-                    arguments: item.toMap(),
-                  );
-                },
-                child: HelpCard(title: item.title, subtitle: item.purpose),
-              );
-            },
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              "Belum ada permintaan bantuan.",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           );
-        },
+        }
+
+        final helpItems = snapshot.data!;
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: helpItems.length,
+          itemBuilder: (context, index) {
+            final item = helpItems[index];
+            return GestureDetector(
+              onTap: () async {
+                setState(() => _isLoading = true);
+                await Navigator.pushNamed(
+                  context,
+                  '/help-detail',
+                  arguments: item.toMap(),
+                );
+                setState(() => _isLoading = false);
+              },
+              child: HelpCard(title: item.title, subtitle: item.purpose),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -253,84 +258,87 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         toolbarHeight: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildHeaderSection(
-              userName: userName,
-              date: _currentDate,
-              profileAsset: "assets/images/profile1.jpeg",
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildHeaderSection(
+                  userName: userName,
+                  date: _currentDate,
+                  profileAsset: "assets/images/profile1.jpeg",
+                ),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Acara Komunitas",
+                            style: WargaKitaTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: WargaKitaColors.black.color,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
                       Text(
-                        "Acara Komunitas",
-                        style: WargaKitaTextStyles.bodyMedium.copyWith(
-                          fontWeight: FontWeight.bold,
+                        "Bantu Komunitas Mengorganisir Acara",
+                        style: WargaKitaTextStyles.bodySmall.copyWith(
                           color: WargaKitaColors.black.color,
-                          fontSize: 18,
+                          fontSize: 14,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Bantu Komunitas Mengorganisir Acara",
-                    style: WargaKitaTextStyles.bodySmall.copyWith(
-                      color: WargaKitaColors.black.color,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
+                ),
+                const SizedBox(height: 10),
 
-            _buildActivityList(),
+                _buildActivityList(),
 
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Peminjaman Barang",
-                        style: WargaKitaTextStyles.bodyMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: WargaKitaColors.black.color,
-                          fontSize: 18,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Peminjaman Barang",
+                            style: WargaKitaTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: WargaKitaColors.black.color,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Bantu Pinjamkan Barang ke Warga yang Membutuhkan",
-                    style: WargaKitaTextStyles.bodySmall.copyWith(
-                      color: WargaKitaColors.black.color,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+                ),
+
+                const SizedBox(height: 10),
+
+                _buildHelpList(),
+              ],
+            ),
+          ),
+          if (_isLoading)
+            Container(
+              color: WargaKitaColors.white.color,
+              child: Center(
+                child: CircularProgressIndicator(color: WargaKitaColors.primary.color),
               ),
             ),
-
-            const SizedBox(height: 10),
-
-            _buildHelpList(),
-          ],
-        ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showSelectionModal,

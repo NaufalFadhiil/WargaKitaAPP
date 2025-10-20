@@ -28,7 +28,7 @@ void _launchWhatsApp(BuildContext context, String whatsappLink) async {
   }
 }
 
-Future<void> _increaseVolunteerCount(BuildContext context, String activityId, String whatsappLink) async {
+Future<bool> _increaseVolunteerCount(BuildContext context, String activityId, String whatsappLink) async {
   final String? currentUid = FirebaseAuth.instance.currentUser?.uid;
   if (activityId.isEmpty || currentUid == null) {
     if (context.mounted) {
@@ -36,7 +36,7 @@ Future<void> _increaseVolunteerCount(BuildContext context, String activityId, St
         const SnackBar(content: Text("Gagal mendapatkan ID pengguna/acara. Gagal bergabung."), backgroundColor: Colors.red),
       );
     }
-    return;
+    return false;
   }
 
   try {
@@ -75,14 +75,15 @@ Future<void> _increaseVolunteerCount(BuildContext context, String activityId, St
       }, SetOptions(merge: true));
     });
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Anda berhasil bergabung! Membuka grup WhatsApp..."), backgroundColor: Colors.green),
-      );
+    if (!context.mounted) return false;
 
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Anda berhasil bergabung! Membuka grup WhatsApp..."), backgroundColor: Colors.green),
+    );
+
 
     _launchWhatsApp(context, whatsappLink);
+    return true;
 
   } catch (e) {
     String errorMessage = 'Gagal bergabung.';
@@ -92,7 +93,7 @@ Future<void> _increaseVolunteerCount(BuildContext context, String activityId, St
     } else if (e.toString().contains("sudah terdaftar")) {
       errorMessage = "Anda sudah terdaftar di acara ini!";
     } else {
-      print('Error updating volunteer count: $e');
+      debugPrint('Error updating volunteer count: $e');
       errorMessage = 'Gagal bergabung: Terjadi error saat update data.';
     }
 
@@ -101,11 +102,12 @@ Future<void> _increaseVolunteerCount(BuildContext context, String activityId, St
         SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
       );
     }
+    return false;
   }
 }
 
 
-void showActivityConfirmDialog(BuildContext context, Map<String, dynamic> activity) {
+Future<bool> showActivityConfirmDialog(BuildContext context, Map<String, dynamic> activity) async {
   final String creatorUid = activity["creatorUid"] as String? ?? 'dummy_uid';
   final String title = activity["title"] as String? ?? 'Detail Acara';
   final String location = activity["location"] as String? ?? 'Lokasi tidak tersedia';
@@ -114,7 +116,7 @@ void showActivityConfirmDialog(BuildContext context, Map<String, dynamic> activi
   final String whatsappLink = activity["whatsappLink"] as String? ?? '';
   final String activityId = activity["id"] as String? ?? '';
 
-  showDialog(
+  final bool? result = await showDialog<bool>(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
@@ -133,7 +135,7 @@ void showActivityConfirmDialog(BuildContext context, Map<String, dynamic> activi
                 children: [
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => Navigator.of(context).pop(false),
                   ),
                   const SizedBox(width: 10),
                   const Text(
@@ -245,9 +247,10 @@ void showActivityConfirmDialog(BuildContext context, Map<String, dynamic> activi
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              _increaseVolunteerCount(context, activityId, whatsappLink);
+                            onPressed: () async {
+                              final bool success = await _increaseVolunteerCount(context, activityId, whatsappLink);
+                              if (!context.mounted) return;
+                              Navigator.of(context).pop(success);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: WargaKitaColors.primary.color,
@@ -275,4 +278,5 @@ void showActivityConfirmDialog(BuildContext context, Map<String, dynamic> activi
       );
     },
   );
+  return result ?? false;
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../data/help_model.dart';
 
 class AddHelpService {
@@ -23,9 +24,9 @@ class AddHelpService {
 
     try {
       await batch.commit();
-      print('Permintaan bantuan berhasil ditambahkan ke Firestore dan counter diupdate!');
+      debugPrint('Permintaan bantuan berhasil ditambahkan ke Firestore dan counter diupdate!');
     } catch (e) {
-      print('Error saat menambahkan permintaan bantuan: $e');
+      debugPrint('Error saat menambahkan permintaan bantuan: $e');
       rethrow;
     }
   }

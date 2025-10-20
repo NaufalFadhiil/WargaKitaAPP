@@ -18,7 +18,7 @@ class HelpData {
     required this.itemDescription,
     String? creatorUid,
     this.helpersUids = const [],
-  }) : this.creatorUid = creatorUid ?? FirebaseAuth.instance.currentUser?.uid ?? 'dummy_uid';
+  }) : creatorUid = creatorUid ?? FirebaseAuth.instance.currentUser?.uid ?? 'dummy_uid';
 
   Map<String, dynamic> toFirestore() {
     return {

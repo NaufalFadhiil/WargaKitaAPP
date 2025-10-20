@@ -1,4 +1,4 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../style/colors/wargakita_colors.dart';
 import '../controller/add_help_controller.dart';
 
@@ -80,9 +80,9 @@ class FormInputField extends StatelessWidget {
               ),
               suffixIcon: suffixIcon != null
                   ? IconButton(
-                      icon: Icon(suffixIcon, color: theme.primaryColor),
-                      onPressed: onSuffixIconTap,
-                    )
+                icon: Icon(suffixIcon, color: theme.primaryColor),
+                onPressed: onSuffixIconTap,
+              )
                   : null,
             ),
           ),
@@ -101,6 +101,7 @@ class AddHelpScreen extends StatefulWidget {
 
 class _AddHelpScreenState extends State<AddHelpScreen> {
   late final AddHelpController _controller;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -115,7 +116,12 @@ class _AddHelpScreenState extends State<AddHelpScreen> {
   }
 
   void _submit() async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
     final success = await _controller.submitHelpRequest(context);
+    setState(() => _isLoading = false);
+
     if (success) {
       if (mounted) {
         Navigator.pop(context);
@@ -136,67 +142,80 @@ class _AddHelpScreenState extends State<AddHelpScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _controller.formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FormInputField(
-                controller: _controller.titleController,
-                title: "Judul Peminjaman",
-                hintText: "Contoh: Pinjam Sound System",
-                validator: (value) =>
-                    _controller.validateRequired(value, 'Judul peminjaman'),
-              ),
-              FormInputField(
-                controller: _controller.locationController,
-                title: "Titik Bertemu/Lokasi Acara",
-                hintText: "Contoh: Rumah Pak RT 01",
-                validator: (value) =>
-                    _controller.validateRequired(value, 'Titik bertemu'),
-              ),
-              FormInputField(
-                controller: _controller.purposeController,
-                title: "Keperluan (Tujuan Peminjaman)",
-                hintText: "Tujuan peminjaman",
-                isLarge: true,
-                validator: (value) =>
-                    _controller.validateRequired(value, 'Keperluan'),
-              ),
-              FormInputField(
-                controller: _controller.itemDescriptionController,
-                title: "Deskripsi Barang",
-                hintText: "Jelaskan barang yang ingin Anda pinjam",
-                isLarge: true,
-                validator: (value) =>
-                    _controller.validateRequired(value, 'Deskripsi barang'),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _controller.formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FormInputField(
+                    controller: _controller.titleController,
+                    title: "Judul Peminjaman",
+                    hintText: "Contoh: Pinjam Sound System",
+                    validator: (value) =>
+                        _controller.validateRequired(value, 'Judul peminjaman'),
+                  ),
+                  FormInputField(
+                    controller: _controller.locationController,
+                    title: "Titik Bertemu/Lokasi Acara",
+                    hintText: "Contoh: Rumah Pak RT 01",
+                    validator: (value) =>
+                        _controller.validateRequired(value, 'Titik bertemu'),
+                  ),
+                  FormInputField(
+                    controller: _controller.purposeController,
+                    title: "Keperluan (Tujuan Peminjaman)",
+                    hintText: "Tujuan peminjaman",
+                    isLarge: true,
+                    validator: (value) =>
+                        _controller.validateRequired(value, 'Keperluan'),
+                  ),
+                  FormInputField(
+                    controller: _controller.itemDescriptionController,
+                    title: "Deskripsi Barang",
+                    hintText: "Jelaskan barang yang ingin Anda pinjam",
+                    isLarge: true,
+                    validator: (value) =>
+                        _controller.validateRequired(value, 'Deskripsi barang'),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isLoading
+                          ?  CircularProgressIndicator(color: WargaKitaColors.white.color)
+                          : Text(
+                        "Tambahkan",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: WargaKitaColors.white.color,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                  child: Text(
-                    "Tambahkan",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: WargaKitaColors.white.color,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          if (_isLoading)
+            Container(
+              color: WargaKitaColors.black.color.withValues(alpha: .5),
+              child:  Center(
+                child: CircularProgressIndicator(color: WargaKitaColors.white.color),
+              ),
+            ),
+        ],
       ),
     );
   }

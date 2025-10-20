@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class DeleteActivityService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -9,9 +10,9 @@ class DeleteActivityService {
     }
     try {
       await _firestore.collection('activities').doc(activityId).delete();
-      print('Aktivitas $activityId berhasil dihapus dari Firestore.');
+      debugPrint('Aktivitas $activityId berhasil dihapus dari Firestore.');
     } catch (e) {
-      print('Error saat menghapus aktivitas: $e');
+      debugPrint('Error saat menghapus aktivitas: $e');
       rethrow;
     }
   }
