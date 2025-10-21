@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:warga_kita_app/provider/user_provider.dart';
 import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 import 'package:warga_kita_app/widget/wargakita_input_decoration.dart';
@@ -138,6 +140,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             'created_help_requests_count': 0,
             'helped_requests_count': 0,
           });
+
+          if (mounted) {
+            Provider.of<UserProvider>(context, listen: false).refreshUserData();
+          }
 
           _showSuccessDialog();
         }

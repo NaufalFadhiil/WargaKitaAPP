@@ -1,11 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
-import '../controller/display_activity_controller.dart';
-import '../controller/display_help_controler.dart';
-import '../data/activity_model.dart';
-import '../data/help_model.dart';
+import '../provider/activity_provider.dart';
+import '../provider/help_request_provider.dart';
+import '../provider/user_provider.dart';
 import '../style/colors/wargakita_colors.dart';
 import '../widget/activity_card.dart';
 import '../widget/add_selection.dart';
@@ -19,32 +18,42 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final DisplayActivityController _activityController;
-  late final DisplayHelpController _helpController;
-
-  User? _currentUser;
   String _currentDate = '';
-  bool _isLoading = false;
+  bool _isNavigating = false;
 
   @override
   void initState() {
     super.initState();
-    _activityController = DisplayActivityController();
-    _helpController = DisplayHelpController();
-    _loadUserInfo();
+    _currentDate = DateFormat('d MMM, yyyy', 'id_ID').format(DateTime.now());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final currentUid = userProvider.currentUid;
+
+      final activityProvider = Provider.of<ActivityProvider>(context, listen: false);
+      final helpProvider = Provider.of<HelpRequestProvider>(context, listen: false);
+
+      if (currentUid.isNotEmpty) {
+        activityProvider.initializeStream(currentUid);
+        helpProvider.initializeStream(currentUid);
+      }
+    });
   }
 
-  void _loadUserInfo() {
-    _currentUser = FirebaseAuth.instance.currentUser;
-    _currentDate = DateFormat('d MMM, yyyy', 'id_ID').format(DateTime.now());
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
   }
 
   void _showSelectionModal() {
     showAddSelectionModal(context);
   }
 
-  void _navigateToProfile() {
-    Navigator.pushNamed(context, '/profile');
+  void _navigateToProfile() async {
+    setState(() => _isNavigating = true);
+    await Navigator.pushNamed(context, '/profile');
+    setState(() => _isNavigating = false);
   }
 
   Widget _buildHeaderSection({
@@ -125,18 +134,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildActivityList() {
-    return StreamBuilder<List<ActivityModel>>(
-      stream: _activityController.activitiesStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: WargaKitaColors.primary.color));
-        }
-        if (snapshot.hasError) {
+    return Consumer<ActivityProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
           return Center(
-            child: Text("Error fetching activities: ${snapshot.error}"),
+            child: CircularProgressIndicator(color: WargaKitaColors.primary.color),
           );
         }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        if (provider.activities.isEmpty) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
@@ -146,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
 
-        final activities = snapshot.data!;
+        final activities = provider.activities;
         const List<Color> bgColors = [
           Color(0xFF003366),
           Color(0xFFFE6B35),
@@ -164,13 +169,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 return GestureDetector(
                   onTap: () async {
-                    setState(() => _isLoading = true);
+                    setState(() => _isNavigating = true);
                     await Navigator.pushNamed(
                       context,
                       '/detail-acara',
                       arguments: activity.toMap()..['bgColor'] = bgColor,
                     );
-                    setState(() => _isLoading = false);
+                    setState(() => _isNavigating = false);
                   },
                   child: ActivityCard(
                     title: activity.title,
@@ -193,10 +198,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHelpList() {
-    return StreamBuilder<List<HelpData>>(
-      stream: _helpController.helpRequestsStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return Consumer<HelpRequestProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -204,14 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         }
-        if (snapshot.hasError) {
-          return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text("Error fetching help requests: ${snapshot.error}"),
-              ));
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        if (provider.helpRequests.isEmpty) {
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -221,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
 
-        final helpItems = snapshot.data!;
+        final helpItems = provider.helpRequests;
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -230,13 +227,13 @@ class _HomeScreenState extends State<HomeScreen> {
             final item = helpItems[index];
             return GestureDetector(
               onTap: () async {
-                setState(() => _isLoading = true);
+                setState(() => _isNavigating = true);
                 await Navigator.pushNamed(
                   context,
                   '/help-detail',
                   arguments: item.toMap(),
                 );
-                setState(() => _isLoading = false);
+                setState(() => _isNavigating = false);
               },
               child: HelpCard(title: item.title, subtitle: item.purpose),
             );
@@ -249,7 +246,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userName = _currentUser?.displayName ?? "Warga Kita";
+
+    final userProvider = Provider.of<UserProvider>(context);
+    final userName = userProvider.userData.username;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -331,9 +330,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          if (_isLoading)
+          if (_isNavigating)
             Container(
-              color: WargaKitaColors.white.color,
+              color: WargaKitaColors.black.color.withValues(alpha: .1),
               child: Center(
                 child: CircularProgressIndicator(color: WargaKitaColors.primary.color),
               ),

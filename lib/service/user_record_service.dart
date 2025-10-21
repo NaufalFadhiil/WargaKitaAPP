@@ -1,15 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 class UserActivityService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-  Future<int> _getCounter(String field) async {
-    if (_currentUid.isEmpty) return 0;
+  Future<int> _getCounter(String uid, String field) async {
+    if (uid.isEmpty) return 0;
     try {
-      final snapshot = await _firestore.collection('users').doc(_currentUid).get();
+      final snapshot = await _firestore.collection('users').doc(uid).get();
       if (snapshot.exists) {
         return snapshot.data()?[field] as int? ?? 0;
       }
@@ -20,19 +18,19 @@ class UserActivityService {
     }
   }
 
-  Future<int> getCreatedActivitiesCount() async {
-    return _getCounter('created_activities_count');
+  Future<int> getCreatedActivitiesCount(String uid) async {
+    return _getCounter(uid, 'created_activities_count');
   }
 
-  Future<int> getJoinedActivitiesCount() async {
-    return _getCounter('joined_activities_count');
+  Future<int> getJoinedActivitiesCount(String uid) async {
+    return _getCounter(uid, 'joined_activities_count');
   }
 
-  Future<int> getCreatedHelpRequestsCount() async {
-    return _getCounter('created_help_requests_count');
+  Future<int> getCreatedHelpRequestsCount(String uid) async {
+    return _getCounter(uid, 'created_help_requests_count');
   }
 
-  Future<int> getHelpedRequestsCount() async {
-    return _getCounter('helped_requests_count');
+  Future<int> getHelpedRequestsCount(String uid) async {
+    return _getCounter(uid, 'helped_requests_count');
   }
 }

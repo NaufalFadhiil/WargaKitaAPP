@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:warga_kita_app/service/delete_activity_service.dart';
 import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 
+import '../provider/user_provider.dart';
 import '../service/user_service.dart';
 import '../widget/activity_confirmation_dialog.dart';
 import '../widget/delete_confirmation_dialog.dart';
@@ -181,15 +183,16 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> with RouteA
 
 
     void onJoinPressed() async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
 
       if (isCreator) {
         showDeleteConfirmationDialog(
           context,
           data["title"] as String? ?? 'Acara',
-              () => _deleteService.deleteActivity(activityId).then((_) {
-            if (!context.mounted) return;
-            Navigator.pop(context);
-          }),
+              () async {
+            await _deleteService.deleteActivity(activityId);
+            userProvider.refreshUserData();
+          },
         );
       } else if (isFull) {
         if (!mounted) return;
@@ -215,6 +218,7 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> with RouteA
 
         if (!mounted) return;
 
+        userProvider.refreshUserData();
         _refreshData();
         setState(() => _isLoading = false);
       }

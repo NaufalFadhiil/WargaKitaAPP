@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:warga_kita_app/service/delete_help_service.dart';
 import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 import '../widget/help_confirmation_dialog.dart';
+import '../provider/user_provider.dart';
 import '../service/user_service.dart';
 import '../widget/delete_confirmation_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -125,14 +127,16 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
     final bool hasHelped = helpersUids.contains(_currentUid);
 
     void onBantuPressed() async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
       if (isCreator) {
         showDeleteConfirmationDialog(
           context,
           data["title"] as String? ?? 'Permintaan Peminjaman',
-              () => _deleteService.deleteHelpRequest(helpId).then((_) {
-            if (!context.mounted) return;
-            Navigator.pop(context);
-          }),
+              () async {
+            await _deleteService.deleteHelpRequest(helpId);
+            userProvider.refreshUserData();
+          },
         );
       } else if (hasHelped) {
         if (!mounted) return;
@@ -163,6 +167,7 @@ class _HelpDetailScreenState extends State<HelpDetailScreen> {
         if (!mounted) return;
 
         if (confirmed == true) {
+          userProvider.refreshUserData();
           _refreshData();
         }
 
