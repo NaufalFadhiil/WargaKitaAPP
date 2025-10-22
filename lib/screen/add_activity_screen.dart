@@ -82,9 +82,9 @@ class FormInputField extends StatelessWidget {
               ),
               suffixIcon: suffixIcon != null
                   ? IconButton(
-                      icon: Icon(suffixIcon, color: theme.primaryColor),
-                      onPressed: onSuffixIconTap,
-                    )
+                icon: Icon(suffixIcon, color: theme.primaryColor),
+                onPressed: onSuffixIconTap,
+              )
                   : null,
             ),
           ),
@@ -103,6 +103,7 @@ class AddActivityScreen extends StatefulWidget {
 
 class _AddActivityScreenState extends State<AddActivityScreen> {
   late final AddActivityController _controller;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -117,7 +118,12 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
   }
 
   void _submit() async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
     final success = await _controller.submitActivity(context);
+    setState(() => _isLoading = false);
+
     if (success) {
       if (mounted) {
         Navigator.pop(context);
@@ -131,139 +137,152 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Tambah Kegiatan"),
+        title: const Text("Tambah Acara"),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.chevron_left, size: 35),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _controller.formKey,
-          child: Column(
-            children: [
-              FormInputField(
-                controller: _controller.titleController,
-                title: "Judul Kegiatan",
-                hintText: "Contoh: Perayaan 17 Agustus Desa Sukamaju",
-                validator: (value) =>
-                    _controller.validateRequired(value, 'Judul kegiatan'),
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _controller.formKey,
+              child: Column(
                 children: [
-                  Expanded(
-                    child: FormInputField(
-                      controller: _controller.dateController,
-                      title: "Tanggal",
-                      hintText: "dd/mm/yy",
-                      suffixIcon: Icons.calendar_today,
-                      onSuffixIconTap: () => _controller.selectDate(context),
-                      validator: _controller.validateDate,
-                    ),
+                  FormInputField(
+                    controller: _controller.titleController,
+                    title: "Judul Acara",
+                    hintText: "Contoh: Perayaan 17 Agustus Desa Sukamaju",
+                    validator: (value) =>
+                        _controller.validateRequired(value, 'Judul acara'),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: FormInputField(
-                      controller: _controller.timeController,
-                      title: "Waktu",
-                      hintText: "07:00",
-                      suffixIcon: Icons.access_time,
-                      onSuffixIconTap: () => _controller.selectTime(context),
-                      validator: _controller.validateTime,
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: FormInputField(
+                          controller: _controller.dateController,
+                          title: "Tanggal",
+                          hintText: "dd/mm/yy",
+                          suffixIcon: Icons.calendar_today,
+                          onSuffixIconTap: () => _controller.selectDate(context),
+                          validator: _controller.validateDate,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: FormInputField(
+                          controller: _controller.timeController,
+                          title: "Waktu",
+                          hintText: "07:00",
+                          suffixIcon: Icons.access_time,
+                          onSuffixIconTap: () => _controller.selectTime(context),
+                          validator: _controller.validateTime,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: FormInputField(
-                      controller: _controller.locationController,
-                      title: "Lokasi Kegiatan",
-                      hintText: "Contoh: Rumah Pak RT 01",
-                      validator: (value) => _controller.validateRequired(
-                        value,
-                        'Lokasi kegiatan',
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: FormInputField(
+                          controller: _controller.locationController,
+                          title: "Lokasi Acara",
+                          hintText: "Contoh: Rumah Pak RT 01",
+                          validator: (value) => _controller.validateRequired(
+                            value,
+                            'Lokasi acara',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: FormInputField(
+                          controller: _controller.volunteersController,
+                          title: "Relawan ",
+                          hintText: "Contoh: 25",
+                          validator: _controller.validateVolunteers,
+                        ),
+                      ),
+                    ],
+                  ),
+                  FormInputField(
+                    controller: _controller.descriptionController,
+                    title: "Deskripsi Acara",
+                    hintText: "Jelaskan acara yang ingin anda buat",
+                    isLarge: true,
+                    validator: (value) =>
+                        _controller.validateRequired(value, 'Deskripsi acara'),
+                  ),
+                  FormInputField(
+                    controller: _controller.aidController,
+                    title: "Kebutuhan Bantuan",
+                    hintText: "Contoh: Tenda, 50 kursi, Sumbangan makanan",
+                    isLarge: true,
+                    validator: (value) =>
+                        _controller.validateRequired(value, 'Kebutuhan bantuan'),
+                  ),
+                  FormInputField(
+                    controller: _controller.goalController,
+                    title: "Tujuan Acara",
+                    hintText: "Contoh: Mempererat tali silaturahmi antar warga",
+                    isLarge: true,
+                    validator: (value) =>
+                        _controller.validateRequired(value, 'Tujuan acara'),
+                  ),
+                  FormInputField(
+                    controller: _controller.whatsappController,
+                    title: "Link Grup WhatsApp",
+                    hintText: "https://chat.whatsapp.com/grup-acara-desa",
+                    validator: (value) =>
+                        _controller.validateRequired(value, 'Link Grup WhatsApp'),
+                  ),
+                  FormInputField(
+                    controller: _controller.notesController,
+                    title: "Catatan",
+                    hintText: "Isi dengan informasi tambahan untuk acara anda",
+                    isLarge: true,
+                    isOptional: true,
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                        "Tambahkan",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: WargaKitaColors.white.color,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: FormInputField(
-                      controller: _controller.volunteersController,
-                      title: "Relawan ",
-                      hintText: "Contoh: 25",
-                      validator: _controller.validateVolunteers,
-                    ),
-                  ),
                 ],
               ),
-              FormInputField(
-                controller: _controller.descriptionController,
-                title: "Deskripsi Kegiatan",
-                hintText: "Jelaskan kegiatan yang ingin anda buat",
-                isLarge: true,
-                validator: (value) =>
-                    _controller.validateRequired(value, 'Deskripsi kegiatan'),
-              ),
-              FormInputField(
-                controller: _controller.aidController,
-                title: "Kebutuhan Bantuan",
-                hintText: "Contoh: Tenda, 50 kursi, Sumbangan makanan",
-                isLarge: true,
-                validator: (value) =>
-                    _controller.validateRequired(value, 'Kebutuhan bantuan'),
-              ),
-              FormInputField(
-                controller: _controller.goalController,
-                title: "Tujuan Kegiatan",
-                hintText: "Contoh: Mempererat tali silaturahmi antar warga",
-                isLarge: true,
-                validator: (value) =>
-                    _controller.validateRequired(value, 'Tujuan kegiatan'),
-              ),
-              FormInputField(
-                controller: _controller.whatsappController,
-                title: "Link Grup WhatsApp",
-                hintText: "https://chat.whatsapp.com/grup-acara-desa",
-                validator: (value) =>
-                    _controller.validateRequired(value, 'Link Grup WhatsApp'),
-              ),
-              FormInputField(
-                controller: _controller.notesController,
-                title: "Catatan",
-                hintText: "Isi dengan informasi tambahan untuk kegiatan anda",
-                isLarge: true,
-                isOptional: true,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    "Tambahkan",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: WargaKitaColors.white.color,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          if (_isLoading)
+            Container(
+              color: Colors.black.withValues(alpha: 0.5),
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
+            ),
+        ],
       ),
     );
   }

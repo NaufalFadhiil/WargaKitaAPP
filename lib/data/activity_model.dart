@@ -32,7 +32,7 @@ class ActivityModel {
     String? creatorUid,
     this.currentVolunteers = 0,
     this.participantsUids = const [],
-  }) : this.creatorUid = creatorUid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+  }) : creatorUid = creatorUid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
 
   Map<String, dynamic> toFirestore() {
     return {

@@ -1,17 +1,76 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:warga_kita_app/service/delete_activity_service.dart';
 import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 
+import '../provider/user_provider.dart';
 import '../service/user_service.dart';
 import '../widget/activity_confirmation_dialog.dart';
+import '../widget/delete_confirmation_dialog.dart';
+import '../data/activity_model.dart';
 
-class ActivityDetailScreen extends StatelessWidget {
-  final Map<String, dynamic> kegiatan;
+class ActivityDetailScreen extends StatefulWidget {
+  final Map<String, dynamic> acara;
+
+  const ActivityDetailScreen({super.key, required this.acara});
+
+  @override
+  State<ActivityDetailScreen> createState() => _ActivityDetailScreenState();
+}
+
+class _ActivityDetailScreenState extends State<ActivityDetailScreen> with RouteAware {
   final UserService _userService = UserService();
+  final DeleteActivityService _deleteService = DeleteActivityService();
   final String _currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  ActivityDetailScreen({super.key, required this.kegiatan});
+  late Map<String, dynamic> _acara;
+  late Future<Map<String, dynamic>> _activityDataFuture;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _acara = widget.acara;
+    _activityDataFuture = _fetchActivityData(_acara["id"] as String? ?? '');
+  }
+
+  Future<Map<String, dynamic>> _fetchActivityData(String activityId) async {
+    if (activityId.isEmpty) return _acara;
+
+    try {
+      final docSnapshot = await _firestore.collection('activities').doc(activityId).get();
+      if (docSnapshot.exists) {
+        final activityModel = ActivityModel.fromFirestore(docSnapshot);
+        final data = activityModel.toMap();
+        data['bgColor'] = _acara['bgColor'];
+        _acara = data;
+        return data;
+      }
+      return _acara;
+    } catch (e) {
+      return _acara;
+    }
+  }
+
+  void _refreshData() {
+    setState(() {
+      _activityDataFuture = _fetchActivityData(_acara["id"] as String? ?? '');
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (ModalRoute.of(context) is PageRoute) {
+      if (ModalRoute.of(context)!.isCurrent) {
+      }
+    }
+  }
+
 
   Widget _buildNotesInfoBox(String notes) {
     if (notes.isEmpty || notes == '-') {
@@ -63,6 +122,10 @@ class ActivityDetailScreen extends StatelessWidget {
       builder: (context, snapshot) {
         final creatorName = snapshot.data ?? 'Memuat...';
 
+        if (snapshot.connectionState == ConnectionState.waiting || _isLoading) {
+          return Center(child: CircularProgressIndicator(color: WargaKitaColors.primary.color));
+        }
+
         return Padding(
           padding: const EdgeInsets.only(bottom: 10.0),
           child: Column(
@@ -102,41 +165,37 @@ class ActivityDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    final String creatorUid = kegiatan["creatorUid"] as String? ?? 'dummy_uid';
+  Widget _buildHeader(BuildContext context, Map<String, dynamic> data) {
+    final String creatorUid = data["creatorUid"] as String? ?? 'dummy_uid';
+    final String activityId = data["id"] as String? ?? '';
     final bool isCreator = creatorUid == _currentUid;
 
-    final int neededVolunteers =
-        int.tryParse(
-          (kegiatan["neededVolunteers"] as dynamic)?.toString() ?? "0",
-        ) ??
-        0;
-
-    final int currentVolunteers = (kegiatan["currentVolunteers"] as int?) ?? 0;
-
     final List<String> participantsUids =
-        (kegiatan["participantsUids"] as List<dynamic>?)
+        (data["participantsUids"] as List<dynamic>?)
             ?.map((e) => e.toString())
-            .toList() ??
-        [];
+            .toList() ?? [];
+
+    final int neededVolunteers = int.tryParse((data["neededVolunteers"] as dynamic)?.toString() ?? "0") ?? 0;
+    final int currentVolunteers = (data["currentVolunteers"] as int?) ?? 0;
 
     final bool hasJoined = participantsUids.contains(_currentUid);
     final bool isFull = currentVolunteers >= neededVolunteers;
 
-    final bool isButtonDisabled = isCreator || isFull || hasJoined;
 
-    void onJoinPressed() {
+    void onJoinPressed() async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
       if (isCreator) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Anda adalah pembuat kegiatan. Anda tidak bisa bergabung.",
-            ),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
-          ),
+        showDeleteConfirmationDialog(
+          context,
+          data["title"] as String? ?? 'Acara',
+              () async {
+            await _deleteService.deleteActivity(activityId);
+            userProvider.refreshUserData();
+          },
         );
       } else if (isFull) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Relawan sudah penuh!"),
@@ -145,32 +204,49 @@ class ActivityDetailScreen extends StatelessWidget {
           ),
         );
       } else if (hasJoined) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Anda sudah bergabung di kegiatan ini."),
+            content: Text("Anda sudah bergabung di acara ini."),
             backgroundColor: Colors.blue,
             duration: Duration(seconds: 2),
           ),
         );
       } else {
-        showActivityConfirmDialog(context, kegiatan);
+        setState(() => _isLoading = true);
+        await showActivityConfirmDialog(context, data);
+
+        if (!mounted) return;
+
+        userProvider.refreshUserData();
+        _refreshData();
+        setState(() => _isLoading = false);
       }
     }
 
+    final bool isButtonDisabled = isFull || hasJoined || _isLoading;
+
     final String buttonText = isCreator
-        ? "Anda Adalah Pembuat"
+        ? "Hapus Acara"
         : isFull
         ? "Relawan Penuh"
         : hasJoined
         ? "Sudah Bergabung"
-        : "Join Kegiatan";
+        : "Bantu Acara";
+
+    final Color buttonColor = isCreator
+        ? WargaKitaColors.secondary.color
+        : isButtonDisabled
+        ? Colors.grey
+        : const Color(0xFFFE6B35);
 
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(20),
           child: Text(
-            kegiatan["title"] as String? ?? 'Detail Kegiatan',
+            data["title"] as String? ?? 'Detail Acara',
+            textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -184,11 +260,9 @@ class ActivityDetailScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ElevatedButton(
-                onPressed: isButtonDisabled ? null : onJoinPressed,
+                onPressed: isCreator ? onJoinPressed : (isButtonDisabled ? null : onJoinPressed),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isButtonDisabled
-                      ? Colors.grey
-                      : const Color(0xFFFE6B35),
+                  backgroundColor: buttonColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: const BorderSide(color: Color(0xFFEDEDED), width: 2),
@@ -200,12 +274,13 @@ class ActivityDetailScreen extends StatelessWidget {
                 ),
                 child: Text(
                   buttonText,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
+              const SizedBox(width: 15),
               Row(
                 children: [
                   const Icon(
@@ -228,8 +303,8 @@ class ActivityDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    Widget _buildDetailInfo({
+  Widget _buildContent(BuildContext context, Map<String, dynamic> data) {
+    Widget buildDetailInfo({
       required IconData icon,
       required String text,
       required Color iconColor,
@@ -251,7 +326,7 @@ class ActivityDetailScreen extends StatelessWidget {
       );
     }
 
-    final String creatorUid = kegiatan["creatorUid"] as String? ?? 'dummy_uid';
+    final String creatorUid = data["creatorUid"] as String? ?? 'dummy_uid';
 
     return Container(
       width: double.infinity,
@@ -269,17 +344,17 @@ class ActivityDetailScreen extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 3,
-                  child: _buildDetailInfo(
+                  child: buildDetailInfo(
                     icon: Icons.calendar_today,
-                    text: kegiatan["date"] as String? ?? '-',
+                    text: data["date"] as String? ?? '-',
                     iconColor: WargaKitaColors.secondary.color,
                   ),
                 ),
                 Expanded(
                   flex: 2,
-                  child: _buildDetailInfo(
+                  child: buildDetailInfo(
                     icon: Icons.access_time,
-                    text: kegiatan["time"] as String? ?? 'Belum ada waktu',
+                    text: data["time"] as String? ?? 'Belum ada waktu',
                     iconColor: WargaKitaColors.secondary.color,
                   ),
                 ),
@@ -287,9 +362,9 @@ class ActivityDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
 
-            _buildDetailInfo(
+            buildDetailInfo(
               icon: Icons.location_on,
-              text: kegiatan["location"] as String? ?? 'Lokasi tidak tersedia',
+              text: data["location"] as String? ?? 'Lokasi tidak tersedia',
               iconColor: WargaKitaColors.secondary.color,
             ),
             const SizedBox(height: 15),
@@ -297,7 +372,7 @@ class ActivityDetailScreen extends StatelessWidget {
             _buildCreatorInfo(context, creatorUid),
 
             Text(
-              "Deskripsi Kegiatan",
+              "Deskripsi Acara",
               style: WargaKitaTextStyles.bodyMedium.copyWith(
                 fontWeight: FontWeight.bold,
                 color: WargaKitaColors.black.color,
@@ -305,7 +380,7 @@ class ActivityDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              kegiatan["description"] as String? ?? 'Deskripsi tidak tersedia.',
+              data["description"] as String? ?? 'Deskripsi tidak tersedia.',
               style: WargaKitaTextStyles.bodyMedium.copyWith(
                 color: WargaKitaColors.black.color,
               ),
@@ -323,7 +398,7 @@ class ActivityDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              kegiatan["requiredAid"] as String? ??
+              data["requiredAid"] as String? ??
                   'Kebutuhan bantuan tidak dicantumkan.',
               style: WargaKitaTextStyles.bodyMedium.copyWith(
                 color: WargaKitaColors.black.color,
@@ -333,7 +408,7 @@ class ActivityDetailScreen extends StatelessWidget {
             const Divider(thickness: 2, height: 15, color: Color(0xFFEDEDED)),
             const SizedBox(height: 10),
             Text(
-              "Tujuan Kegiatan",
+              "Tujuan Acara",
               style: WargaKitaTextStyles.bodyMedium.copyWith(
                 fontWeight: FontWeight.bold,
                 color: WargaKitaColors.black.color,
@@ -341,15 +416,15 @@ class ActivityDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              kegiatan["goal"] as String? ??
-                  'Tujuan kegiatan tidak dicantumkan.',
+              data["goal"] as String? ??
+                  'Tujuan acara tidak dicantumkan.',
               style: WargaKitaTextStyles.bodyMedium.copyWith(
                 color: WargaKitaColors.black.color,
               ),
             ),
 
             const SizedBox(height: 20),
-            _buildNotesInfoBox(kegiatan["notes"] as String? ?? ''),
+            _buildNotesInfoBox(data["notes"] as String? ?? ''),
           ],
         ),
       ),
@@ -358,8 +433,7 @@ class ActivityDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor =
-        kegiatan["bgColor"] as Color? ?? const Color(0xFF003E6A);
+    final Color bgColor = _acara["bgColor"] as Color? ?? const Color(0xFF003E6A);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -367,31 +441,48 @@ class ActivityDetailScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Padding(
-          padding: EdgeInsets.only(left: 16),
+          padding: const EdgeInsets.only(left: 16),
           child: InkWell(
             onTap: () {
               Navigator.pop(context);
             },
-            child: Container(
+            child: const SizedBox(
               width: 40,
               height: 40,
-              child: const Icon(Icons.chevron_left, size: 35),
+              child: Icon(Icons.chevron_left, size: 35),
             ),
           ),
         ),
         title: const Text(
-          "Detail Kegiatan",
+          "Detail Acara",
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            Expanded(child: _buildContent(context)),
-          ],
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: _activityDataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                color: WargaKitaColors.white.color,
+                child: Center(child: CircularProgressIndicator(color: WargaKitaColors.primary.color)),
+              );
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return Center(child: Text("Gagal memuat detail acara.", style: TextStyle(color: WargaKitaColors.primary.color)));
+            }
+
+            final data = snapshot.data!;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context, data),
+                Expanded(child: _buildContent(context, data)),
+              ],
+            );
+          },
         ),
       ),
     );

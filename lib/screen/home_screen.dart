@@ -1,12 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
-import 'package:warga_kita_app/widget/logout_button.dart';
-import '../controller/display_activity_controller.dart';
-import '../controller/display_help_controler.dart';
-import '../data/activity_model.dart';
-import '../data/help_model.dart';
+import '../provider/activity_provider.dart';
+import '../provider/help_request_provider.dart';
+import '../provider/user_provider.dart';
 import '../style/colors/wargakita_colors.dart';
 import '../widget/activity_card.dart';
 import '../widget/add_selection.dart';
@@ -20,38 +18,48 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final DisplayActivityController _activityController;
-  late final DisplayHelpController _helpController;
-
-  User? _currentUser;
   String _currentDate = '';
+  bool _isNavigating = false;
 
   @override
   void initState() {
     super.initState();
-    _activityController = DisplayActivityController();
-    _helpController = DisplayHelpController();
-    _loadUserInfo();
+    _currentDate = DateFormat('d MMM, yyyy', 'id_ID').format(DateTime.now());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final currentUid = userProvider.currentUid;
+
+      final activityProvider = Provider.of<ActivityProvider>(context, listen: false);
+      final helpProvider = Provider.of<HelpRequestProvider>(context, listen: false);
+
+      if (currentUid.isNotEmpty) {
+        activityProvider.initializeStream(currentUid);
+        helpProvider.initializeStream(currentUid);
+      }
+    });
   }
 
-  void _loadUserInfo() {
-    _currentUser = FirebaseAuth.instance.currentUser;
-    _currentDate = DateFormat('d MMM, yyyy', 'id_ID').format(DateTime.now());
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
   }
 
   void _showSelectionModal() {
     showAddSelectionModal(context);
   }
 
-  void _navigateToProfile() {
-    Navigator.pushNamed(context, '/profile');
+  void _navigateToProfile() async {
+    setState(() => _isNavigating = true);
+    await Navigator.pushNamed(context, '/profile');
+    setState(() => _isNavigating = false);
   }
 
   Widget _buildHeaderSection({
     required String userName,
     required String date,
     required String profileAsset,
-    Widget? logoutButton,
   }) {
     return Container(
       width: double.infinity,
@@ -76,7 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const Spacer(),
-              if (logoutButton != null) logoutButton,
               GestureDetector(
                 onTap: _navigateToProfile,
                 child: const CircleAvatar(
@@ -127,18 +134,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildActivityList() {
-    return StreamBuilder<List<ActivityModel>>(
-      stream: _activityController.activitiesStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
+    return Consumer<ActivityProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
           return Center(
-            child: Text("Error fetching activities: ${snapshot.error}"),
+            child: CircularProgressIndicator(color: WargaKitaColors.primary.color),
           );
         }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        if (provider.activities.isEmpty) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
@@ -148,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
 
-        final activities = snapshot.data!;
+        final activities = provider.activities;
         const List<Color> bgColors = [
           Color(0xFF003366),
           Color(0xFFFE6B35),
@@ -165,12 +168,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 final bgColor = bgColors[index % bgColors.length];
 
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(
+                  onTap: () async {
+                    setState(() => _isNavigating = true);
+                    await Navigator.pushNamed(
                       context,
-                      '/detail-kegiatan',
+                      '/detail-acara',
                       arguments: activity.toMap()..['bgColor'] = bgColor,
                     );
+                    setState(() => _isNavigating = false);
                   },
                   child: ActivityCard(
                     title: activity.title,
@@ -183,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     bgColor: bgColor,
                   ),
                 );
-              }).toList(),
+              }),
               const SizedBox(width: 16),
             ],
           ),
@@ -193,26 +198,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHelpList() {
-    return StreamBuilder<List<HelpData>>(
-      stream: _helpController.helpRequestsStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        if (snapshot.hasError) {
+    return Consumer<HelpRequestProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text("Error fetching help requests: ${snapshot.error}"),
+              child: CircularProgressIndicator(color: WargaKitaColors.primary.color),
             ),
           );
         }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        if (provider.helpRequests.isEmpty) {
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -222,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
 
-        final helpItems = snapshot.data!;
+        final helpItems = provider.helpRequests;
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -230,12 +226,14 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             final item = helpItems[index];
             return GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(
+              onTap: () async {
+                setState(() => _isNavigating = true);
+                await Navigator.pushNamed(
                   context,
                   '/help-detail',
                   arguments: item.toMap(),
                 );
+                setState(() => _isNavigating = false);
               },
               child: HelpCard(title: item.title, subtitle: item.purpose),
             );
@@ -248,7 +246,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userName = _currentUser?.displayName ?? "Warga Kita";
+
+    final userProvider = Provider.of<UserProvider>(context);
+    final userName = userProvider.userData.username;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -257,85 +257,87 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         toolbarHeight: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildHeaderSection(
-              userName: userName,
-              date: _currentDate,
-              profileAsset: "assets/images/profile1.jpeg",
-              logoutButton: const LogoutButton(),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildHeaderSection(
+                  userName: userName,
+                  date: _currentDate,
+                  profileAsset: "assets/images/profile1.jpeg",
+                ),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Acara Komunitas",
+                            style: WargaKitaTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: WargaKitaColors.black.color,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
                       Text(
-                        "Aktivitas Community",
-                        style: WargaKitaTextStyles.bodyMedium.copyWith(
-                          fontWeight: FontWeight.bold,
+                        "Bantu Komunitas Mengorganisir Acara",
+                        style: WargaKitaTextStyles.bodySmall.copyWith(
                           color: WargaKitaColors.black.color,
-                          fontSize: 18,
+                          fontSize: 14,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Bantu Komunitas Mengorganisir Acara",
-                    style: WargaKitaTextStyles.bodySmall.copyWith(
-                      color: WargaKitaColors.black.color,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
+                ),
+                const SizedBox(height: 10),
 
-            _buildActivityList(),
+                _buildActivityList(),
 
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Bantu Warga",
-                        style: WargaKitaTextStyles.bodyMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: WargaKitaColors.black.color,
-                          fontSize: 18,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Peminjaman Barang",
+                            style: WargaKitaTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: WargaKitaColors.black.color,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Bantu Pinjamkan Barang ke Warga yang Membutuhkan",
-                    style: WargaKitaTextStyles.bodySmall.copyWith(
-                      color: WargaKitaColors.black.color,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+                ),
+
+                const SizedBox(height: 10),
+
+                _buildHelpList(),
+              ],
+            ),
+          ),
+          if (_isNavigating)
+            Container(
+              color: WargaKitaColors.black.color.withValues(alpha: .1),
+              child: Center(
+                child: CircularProgressIndicator(color: WargaKitaColors.primary.color),
               ),
             ),
-
-            const SizedBox(height: 10),
-
-            _buildHelpList(),
-          ],
-        ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showSelectionModal,
