@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:warga_kita_app/provider/user_provider.dart';
 import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 import 'package:warga_kita_app/widget/wargakita_input_decoration.dart';
@@ -78,7 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: () {
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       '/login',
-                      (Route<dynamic> route) => false,
+                          (Route<dynamic> route) => false,
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -127,12 +129,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
               .collection('users')
               .doc(user.uid)
               .set({
-                'uid': user.uid,
-                'username': _nameController.text,
-                'email': _emailController.text,
-                'phone_number': _phoneController.text,
-                'created_at': FieldValue.serverTimestamp(),
-              });
+            'uid': user.uid,
+            'username': _nameController.text,
+            'email': _emailController.text,
+            'phone_number': _phoneController.text,
+            'created_at': FieldValue.serverTimestamp(),
+
+            'created_activities_count': 0,
+            'joined_activities_count': 0,
+            'created_help_requests_count': 0,
+            'helped_requests_count': 0,
+          });
+
+          if (mounted) {
+            Provider.of<UserProvider>(context, listen: false).refreshUserData();
+          }
 
           _showSuccessDialog();
         }
@@ -191,7 +202,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Register untuk akses Community!',
+                      'Register untuk akses Komunitas!',
                       style: WargaKitaTextStyles.bodyMedium,
                     ),
 
@@ -262,7 +273,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       decoration: WargaKitaInputDecoration(
                         icon: Icons.phone,
                         labelText: 'Nomor Telepon',
-                        hintText: '08xxxxxxxxx',
+                        hintText: '62xxxxxxxxx',
                       ),
                     ),
                     const SizedBox(height: 21),

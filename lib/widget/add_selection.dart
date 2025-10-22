@@ -47,7 +47,7 @@ class AddSelectionModal extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
-                "Buat Aktivitas Baru",
+                "Pilih",
                 style: theme.textTheme.headlineLarge,
               ),
               const SizedBox(height: 20),

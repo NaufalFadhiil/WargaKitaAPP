@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:warga_kita_app/provider/user_provider.dart';
 import 'package:warga_kita_app/style/colors/wargakita_colors.dart';
 import 'package:warga_kita_app/style/typography/wargakita_text_styles.dart';
 import 'package:warga_kita_app/widget/wargakita_input_decoration.dart';
@@ -49,9 +51,16 @@ class _LoginScreenState extends State<LoginScreen> {
           email: _emailController.text,
           password: _passwordController.text,
         );
-        _showSuccessSnackbar("Login Berhasil! Selamat datang di Community.");
+
+        if (!mounted) return;
+
+        await Provider.of<UserProvider>(context, listen: false).refreshUserData();
+
+        _showSuccessSnackbar("Login Berhasil! Selamat datang di Komunitas.");
 
         await Future.delayed(const Duration(milliseconds: 500));
+
+        if (!mounted) return;
 
         Navigator.of(context).pushReplacementNamed('/home');
       } on FirebaseAuthException catch (e) {
@@ -104,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Login untuk akses Community!',
+                    'Login untuk akses Komunitas!',
                     style: WargaKitaTextStyles.bodyMedium,
                   ),
 
@@ -188,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.pushNamed(context, '/register');
                         },
                         child: Text(
-                          'Daftar Sekarang',
+                          'Register Sekarang',
                           style: WargaKitaTextStyles.bodyMedium.copyWith(
                             color: WargaKitaColors.primary.color,
                             fontWeight: FontWeight.bold,

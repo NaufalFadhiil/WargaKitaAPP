@@ -39,9 +39,9 @@ class GetStartedApp extends StatelessWidget {
               ),
               SizedBox.square(dimension: 20,),
               Text(
-                'Akses informasi kegiatan kapan saja,\nberikan bantuan dan dukungan\njadikan hidup lebih ringan bersama komunitas.',
+                'Akses informasi acara kapan saja,\nberikan bantuan dan dukungan\njadikan hidup lebih ringan bersama komunitas.',
                 textAlign: TextAlign.center,
-                style: WargaKitaTextStyles.bodySmall.copyWith(
+                style: WargaKitaTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),

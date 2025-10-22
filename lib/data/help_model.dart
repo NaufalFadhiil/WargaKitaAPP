@@ -8,7 +8,7 @@ class HelpData {
   final String purpose;
   final String itemDescription;
   final String creatorUid;
-  final String phoneNumber;
+  final List<String> helpersUids;
 
   HelpData({
     this.id = '',
@@ -17,8 +17,8 @@ class HelpData {
     required this.purpose,
     required this.itemDescription,
     String? creatorUid,
-    this.phoneNumber = '6281234567890',
-  }) : this.creatorUid = creatorUid ?? FirebaseAuth.instance.currentUser?.uid ?? 'dummy_uid';
+    this.helpersUids = const [],
+  }) : creatorUid = creatorUid ?? FirebaseAuth.instance.currentUser?.uid ?? 'dummy_uid';
 
   Map<String, dynamic> toFirestore() {
     return {
@@ -27,12 +27,17 @@ class HelpData {
       'purpose': purpose,
       'itemDescription': itemDescription,
       'creatorUid': creatorUid,
+      'helpersUids': helpersUids,
       'createdAt': FieldValue.serverTimestamp(),
     };
   }
 
   factory HelpData.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    final List<String> helpers = (data['helpersUids'] is List)
+        ? List<String>.from(data['helpersUids'])
+        : [];
+
     return HelpData(
       id: doc.id,
       title: data['title'] as String? ?? 'No Title',
@@ -40,18 +45,19 @@ class HelpData {
       purpose: data['purpose'] as String? ?? 'No Purpose',
       itemDescription: data['itemDescription'] as String? ?? 'No Description',
       creatorUid: data['creatorUid'] as String? ?? 'dummy_uid',
-      phoneNumber: '6281234567890',
+      helpersUids: helpers,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'title': title,
       'needs': purpose,
       'description': itemDescription,
       'location': location,
       'creatorUid': creatorUid,
-      'phoneNumber': phoneNumber,
+      'helpersUids': helpersUids,
     };
   }
 }
